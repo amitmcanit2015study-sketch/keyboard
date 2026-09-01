@@ -1,0 +1,54 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- Primary Theme Colors (Material 3 Indigo / Modern Blue-Purple Unified) -->
+    <color name="md_theme_light_primary">#3B50DF</color>
+    <color name="md_theme_light_onPrimary">#FFFFFF</color>
+    <color name="md_theme_light_primaryContainer">#DFE0FF</color>
+    <color name="md_theme_light_onPrimaryContainer">#000B5C</color>
+
+    <color name="md_theme_light_secondary">#5C5D72</color>
+    <color name="md_theme_light_onSecondary">#FFFFFF</color>
+    <color name="md_theme_light_secondaryContainer">#E1E0F9</color>
+    <color name="md_theme_light_onSecondaryContainer">#191A2C</color>
+
+    <color name="md_theme_light_tertiary">#78536B</color>
+    <color name="md_theme_light_onTertiary">#FFFFFF</color>
+    <color name="md_theme_light_tertiaryContainer">#FFD7EE</color>
+    <color name="md_theme_light_onTertiaryContainer">#2E1126</color>
+
+    <color name="md_theme_light_error">#BA1A1A</color>
+    <color name="md_theme_light_onError">#FFFFFF</color>
+    <color name="md_theme_light_errorContainer">#FFDAD6</color>
+    <color name="md_theme_light_onErrorContainer">#410002</color>
+
+    <color name="md_theme_light_background">#FDFBFF</color>
+    <color name="md_theme_light_onBackground">#1A1B1F</color>
+    <color name="md_theme_light_surface">#FDFBFF</color>
+    <color name="md_theme_light_onSurface">#1A1B1F</color>
+    <color name="md_theme_light_surfaceVariant">#E3E1EC</color>
+    <color name="md_theme_light_onSurfaceVariant">#46464F</color>
+    <color name="md_theme_light_outline">#777680</color>
+
+    <!-- Dark Theme Colors -->
+    <color name="md_theme_dark_primary">#BCC2FF</color>
+    <color name="md_theme_dark_onPrimary">#00189B</color>
+    <color name="md_theme_dark_primaryContainer">#1F35C7</color>
+    <color name="md_theme_dark_onPrimaryContainer">#DFE0FF</color>
+
+    <color name="md_theme_dark_secondary">#C5C4DD</color>
+    <color name="md_theme_dark_onSecondary">#2E2F42</color>
+    <color name="md_theme_dark_secondaryContainer">#444559</color>
+    <color name="md_theme_dark_onSecondaryContainer">#E1E0F9</color>
+
+    <color name="md_theme_dark_background">#111216</color>
+    <color name="md_theme_dark_onBackground">#E4E1E6</color>
+    <color name="md_theme_dark_surface">#1A1B1F</color>
+    <color name="md_theme_dark_onSurface">#E4E1E6</color>
+    <color name="md_theme_dark_surfaceVariant">#25272F</color>
+    <color name="md_theme_dark_onSurfaceVariant">#C7C5D0</color>
+    <color name="md_theme_dark_outline">#91909A</color>
+
+    <!-- Gradients -->
+    <color name="gradient_start">#3B50DF</color>
+    <color name="gradient_end">#8F39D6</color>
+</resources>

@@ -1,0 +1,18 @@
+[
+    {
+        "merged": "com.amitbharat.hindikeyboard.app-mergeDebugResources-64:/layout/activity_about.xml",
+        "source": "com.amitbharat.hindikeyboard.app-main-67:/layout/activity_about.xml"
+    },
+    {
+        "merged": "com.amitbharat.hindikeyboard.app-mergeDebugResources-64:/layout/activity_settings.xml",
+        "source": "com.amitbharat.hindikeyboard.app-main-67:/layout/activity_settings.xml"
+    },
+    {
+        "merged": "com.amitbharat.hindikeyboard.app-mergeDebugResources-64:/layout/activity_splash.xml",
+        "source": "com.amitbharat.hindikeyboard.app-main-67:/layout/activity_splash.xml"
+    },
+    {
+        "merged": "com.amitbharat.hindikeyboard.app-mergeDebugResources-64:/layout/activity_main.xml",
+        "source": "com.amitbharat.hindikeyboard.app-main-67:/layout/activity_main.xml"
+    }
+]

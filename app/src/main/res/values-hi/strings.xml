@@ -1,0 +1,47 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">इंडिक कीबोर्ड</string>
+    <string name="app_header_subtitle">द्वारा अमित भारत</string>
+    <string name="developer_name">अमित भारत</string>
+    <string name="developed_by">डेवलपर: अमित भारत</string>
+    <string name="developed_by_full">डेवलपर: अमित भारत</string>
+    <string name="company_name">रूयस सॉफ्ट टेक</string>
+    <string name="company_name_full">कंपनी: रूयस सॉफ्ट टेक</string>
+    <string name="company_email">rooyssofttech2020@gmail.com</string>
+    <string name="app_version_name">v1.0.0.1 (प्रोडक्शन बिल्ड)</string>
+    <string name="action_about">ऐप के बारे में</string>
+    <string name="action_settings">सेटिंग्स</string>
+    <string name="share_app">साझा करें</string>
+    <string name="download_apk">डाउनलोड APK</string>
+    <string name="send_feedback">प्रतिक्रिया भेजें</string>
+    <string name="about_footer">100% ऑफलाइन • विज्ञापन-मुक्त • कोई ट्रैकिंग नहीं</string>
+    <string name="about_description">इंडिक कीबोर्ड एक तेज़, सुरक्षित द्विभाषी एंड्रॉइड कीबोर्ड है जो सहज अंग्रेजी और हिंदी टाइपिंग प्रदान करता है। इसमें 1-टैप लिप्यंतरण (ट्रांसलिट्रेशन), स्मार्ट सुझाव, इमोजी भविष्यवाणी और क्लिपबोर्ड इतिहास शामिल है।</string>
+
+    <string name="subtype_en_us">अंग्रेजी (US)</string>
+    <string name="subtype_hi_in">हिंदी (लिप्यंतरण)</string>
+
+    <!-- Setup Wizard -->
+    <string name="setup_title">इंडिक कीबोर्ड सक्षम करें</string>
+    <string name="setup_subtitle">1-टैप अंग्रेजी ↔ हिन्दी टाइपिंग के साथ तेज़ और सुरक्षित कीबोर्ड</string>
+    <string name="step_1_title">चरण 1: सेटिंग्स में चालू करें</string>
+    <string name="step_1_desc">सिस्टम सेटिंग्स में इंडिक कीबोर्ड चालू करें</string>
+    <string name="btn_enable_ime">सेटिंग्स खोलें</string>
+    <string name="step_2_title">चरण 2: कीबोर्ड चुनें</string>
+    <string name="step_2_desc">इंडिक कीबोर्ड को सक्रिय कीबोर्ड के रूप में चुनें</string>
+    <string name="btn_select_ime">कीबोर्ड बदलें</string>
+    <string name="step_3_title">चरण 3: टाइपिंग टेस्ट करें</string>
+    <string name="test_typing_hint">यहाँ टाइप करें: namaste, mera naam amit hai, gm…</string>
+
+    <!-- Settings -->
+    <string name="pref_theme_title">कीबोर्ड थीम</string>
+    <string name="pref_theme_desc">अपनी पसंदीदा थीम चुनें</string>
+    <string name="pref_sound_title">कुंजी दबाने की ध्वनि</string>
+    <string name="pref_vibrate_title">कुंजी कंपन (वाइब्रेशन)</string>
+    <string name="pref_number_row_title">संख्या पंक्ति (0-9)</string>
+    <string name="pref_number_row_desc">कीबोर्ड के ऊपर संख्या पंक्ति हमेशा दिखाएं</string>
+    <string name="pref_auto_correct_title">स्वतः सुधार (Auto-Correct)</string>
+    <string name="pref_emoji_suggestion_title">इमोजी सुझाव</string>
+    <string name="pref_clipboard_title">क्लिपबोर्ड इतिहास</string>
+    <string name="pref_clipboard_desc">हाल ही में कॉपी किए गए टेक्स्ट को सहेजें</string>
+    <string name="pref_key_height_title">कुंजी की ऊंचाई</string>
+</resources>
