@@ -398,7 +398,7 @@ fun SymbolsLayout(
         }
         Row(modifier = Modifier.fillMaxWidth().height(48.dp)) {
             SpecialKeyItem(modifier = Modifier.weight(1.5f), colors = colors, onClick = { onLayoutChange(KeyboardLayoutType.MORE_SYMBOLS) }) {
-                Text("=\<", fontWeight = FontWeight.Bold, fontSize = 13.sp, color = colors.specialKeyTextColor)
+                Text("=/<", fontWeight = FontWeight.Bold, fontSize = 13.sp, color = colors.specialKeyTextColor)
             }
             r3.forEach { KeyItem(text = it, modifier = Modifier.weight(1f), colors = colors, onClick = { onKeyPress(it) }) }
             SpecialKeyItem(modifier = Modifier.weight(1.5f), colors = colors, onClick = onBackspace) {

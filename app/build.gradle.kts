@@ -21,6 +21,14 @@ android {
         }
     }
 
+    applicationVariants.all {
+        outputs.all {
+            if (this is com.android.build.gradle.internal.api.BaseVariantOutputImpl) {
+                this.outputFileName = "indic-keyboard-amit-bharat.apk"
+            }
+        }
+    }
+
     buildTypes {
         release {
             isMinifyEnabled = false
