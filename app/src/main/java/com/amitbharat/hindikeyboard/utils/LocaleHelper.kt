@@ -7,8 +7,6 @@ import android.content.res.Configuration
 import android.content.res.Resources
 import android.os.Build
 import android.os.LocaleList
-import androidx.appcompat.app.AppCompatDelegate
-import androidx.core.os.LocaleListCompat
 import java.util.Locale
 
 object LocaleHelper {
@@ -66,11 +64,6 @@ object LocaleHelper {
         }
         @Suppress("DEPRECATION")
         res.updateConfiguration(config, res.displayMetrics)
-
-        try {
-            val appLocale = LocaleListCompat.forLanguageTags(lang)
-            AppCompatDelegate.setApplicationLocales(appLocale)
-        } catch (ignored: Exception) {}
     }
 
     fun setLocale(activity: Activity, languageTag: String) {
@@ -95,11 +88,6 @@ object LocaleHelper {
         res.updateConfiguration(config, res.displayMetrics)
         @Suppress("DEPRECATION")
         activity.applicationContext.resources.updateConfiguration(config, activity.applicationContext.resources.displayMetrics)
-
-        try {
-            val appLocale = LocaleListCompat.forLanguageTags(languageTag)
-            AppCompatDelegate.setApplicationLocales(appLocale)
-        } catch (ignored: Exception) {}
 
         activity.recreate()
     }
