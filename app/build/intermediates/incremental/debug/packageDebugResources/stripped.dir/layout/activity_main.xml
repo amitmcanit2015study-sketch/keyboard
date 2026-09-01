@@ -32,11 +32,55 @@
             android:orientation="vertical"
             android:padding="20dp">
 
-            <!-- Hero Intro Card -->
+            <!-- Active Keyboard Success Banner -->
             <com.google.android.material.card.MaterialCardView
+                android:id="@+id/cardActiveSuccess"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
+                android:visibility="gone"
                 app:cardCornerRadius="20dp"
+                app:cardElevation="2dp"
+                app:cardBackgroundColor="#E8F5E9">
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="vertical"
+                    android:padding="20dp">
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="✓ Indic Keyboard is Active!"
+                        android:textAppearance="@style/TextAppearance.Material3.TitleMedium"
+                        android:textColor="#1B5E20"
+                        android:textStyle="bold" />
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_marginTop="4dp"
+                        android:text="Indic Keyboard is set as your default keyboard across all apps."
+                        android:textColor="#2E7D32"
+                        android:textSize="13.5sp" />
+
+                    <com.google.android.material.button.MaterialButton
+                        android:id="@+id/btnSwitchKeyboard"
+                        style="@style/Widget.Material3.Button.TonalButton"
+                        android:layout_width="wrap_content"
+                        android:layout_height="42dp"
+                        android:layout_marginTop="12dp"
+                        android:text="Change Default Keyboard" />
+
+                </LinearLayout>
+            </com.google.android.material.card.MaterialCardView>
+
+            <!-- Step 1: Enable IME Card -->
+            <com.google.android.material.card.MaterialCardView
+                android:id="@+id/cardStep1"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                app:cardCornerRadius="18dp"
                 app:cardElevation="2dp"
                 app:cardBackgroundColor="?attr/colorPrimaryContainer">
 
@@ -49,7 +93,7 @@
                     <TextView
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:text="@string/setup_title"
+                        android:text="@string/step_1_title"
                         android:textAppearance="@style/TextAppearance.Material3.TitleMedium"
                         android:textColor="?attr/colorOnPrimaryContainer"
                         android:textStyle="bold" />
@@ -57,94 +101,61 @@
                     <TextView
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:layout_marginTop="6dp"
-                        android:text="@string/setup_subtitle"
-                        android:textColor="?attr/colorOnPrimaryContainer"
-                        android:textSize="14sp" />
-
-                </LinearLayout>
-            </com.google.android.material.card.MaterialCardView>
-
-            <!-- Step 1: Enable IME -->
-            <com.google.android.material.card.MaterialCardView
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_marginTop="16dp"
-                app:cardCornerRadius="16dp"
-                app:cardElevation="1dp"
-                app:cardBackgroundColor="?attr/colorSurfaceVariant">
-
-                <LinearLayout
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:orientation="vertical"
-                    android:padding="16dp">
-
-                    <TextView
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:text="@string/step_1_title"
-                        android:textAppearance="@style/TextAppearance.Material3.TitleSmall"
-                        android:textColor="?attr/colorOnSurface"
-                        android:textStyle="bold" />
-
-                    <TextView
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
                         android:layout_marginTop="4dp"
                         android:text="@string/step_1_desc"
-                        android:textColor="?attr/colorOnSurfaceVariant"
-                        android:textSize="13sp" />
+                        android:textColor="?attr/colorOnPrimaryContainer"
+                        android:textSize="13.5sp" />
 
                     <com.google.android.material.button.MaterialButton
                         android:id="@+id/btnEnableIme"
                         style="@style/Widget.Material3.Button"
                         android:layout_width="match_parent"
                         android:layout_height="48dp"
-                        android:layout_marginTop="12dp"
+                        android:layout_marginTop="14dp"
                         android:text="@string/btn_enable_ime" />
 
                 </LinearLayout>
             </com.google.android.material.card.MaterialCardView>
 
-            <!-- Step 2: Select IME -->
+            <!-- Step 2: Set as Default Keyboard Card -->
             <com.google.android.material.card.MaterialCardView
+                android:id="@+id/cardStep2"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_marginTop="16dp"
-                app:cardCornerRadius="16dp"
-                app:cardElevation="1dp"
-                app:cardBackgroundColor="?attr/colorSurfaceVariant">
+                android:visibility="gone"
+                app:cardCornerRadius="18dp"
+                app:cardElevation="2dp"
+                app:cardBackgroundColor="?attr/colorPrimaryContainer">
 
                 <LinearLayout
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:orientation="vertical"
-                    android:padding="16dp">
+                    android:padding="20dp">
 
                     <TextView
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:text="@string/step_2_title"
-                        android:textAppearance="@style/TextAppearance.Material3.TitleSmall"
-                        android:textColor="?attr/colorOnSurface"
+                        android:textAppearance="@style/TextAppearance.Material3.TitleMedium"
+                        android:textColor="?attr/colorOnPrimaryContainer"
                         android:textStyle="bold" />
 
                     <TextView
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:layout_marginTop="4dp"
-                        android:text="@string/step_2_desc"
-                        android:textColor="?attr/colorOnSurfaceVariant"
-                        android:textSize="13sp" />
+                        android:text="Select Indic Keyboard to use it as default keyboard across all apps."
+                        android:textColor="?attr/colorOnPrimaryContainer"
+                        android:textSize="13.5sp" />
 
                     <com.google.android.material.button.MaterialButton
                         android:id="@+id/btnSelectIme"
-                        style="@style/Widget.Material3.Button.TonalButton"
+                        style="@style/Widget.Material3.Button"
                         android:layout_width="match_parent"
                         android:layout_height="48dp"
-                        android:layout_marginTop="12dp"
-                        android:text="@string/btn_select_ime" />
+                        android:layout_marginTop="14dp"
+                        android:text="Set as Default Keyboard" />
 
                 </LinearLayout>
             </com.google.android.material.card.MaterialCardView>

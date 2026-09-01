@@ -66,6 +66,10 @@ id btnOpenAbout
 id btnOpenSettings
 id btnSelectIme
 id btnShareApp
+id btnSwitchKeyboard
+id cardActiveSuccess
+id cardStep1
+id cardStep2
 id etTestInput
 id imgLogo
 id switchAutoCorrect

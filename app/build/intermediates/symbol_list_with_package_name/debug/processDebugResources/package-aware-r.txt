@@ -3274,10 +3274,14 @@ id btnOpenAbout
 id btnOpenSettings
 id btnSelectIme
 id btnShareApp
+id btnSwitchKeyboard
 id buttonPanel
 id cache_measures
 id callMeasure
 id cancel_button
+id cardActiveSuccess
+id cardStep1
+id cardStep2
 id carryVelocity
 id center
 id centerCrop

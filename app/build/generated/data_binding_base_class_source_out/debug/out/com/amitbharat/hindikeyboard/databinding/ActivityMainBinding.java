@@ -12,6 +12,7 @@ import androidx.viewbinding.ViewBindings;
 import com.amitbharat.hindikeyboard.R;
 import com.google.android.material.appbar.MaterialToolbar;
 import com.google.android.material.button.MaterialButton;
+import com.google.android.material.card.MaterialCardView;
 import com.google.android.material.textfield.TextInputEditText;
 import java.lang.NullPointerException;
 import java.lang.Override;
@@ -34,6 +35,18 @@ public final class ActivityMainBinding implements ViewBinding {
   public final MaterialButton btnSelectIme;
 
   @NonNull
+  public final MaterialButton btnSwitchKeyboard;
+
+  @NonNull
+  public final MaterialCardView cardActiveSuccess;
+
+  @NonNull
+  public final MaterialCardView cardStep1;
+
+  @NonNull
+  public final MaterialCardView cardStep2;
+
+  @NonNull
   public final TextInputEditText etTestInput;
 
   @NonNull
@@ -42,12 +55,18 @@ public final class ActivityMainBinding implements ViewBinding {
   private ActivityMainBinding(@NonNull CoordinatorLayout rootView,
       @NonNull MaterialButton btnEnableIme, @NonNull MaterialButton btnOpenAbout,
       @NonNull MaterialButton btnOpenSettings, @NonNull MaterialButton btnSelectIme,
+      @NonNull MaterialButton btnSwitchKeyboard, @NonNull MaterialCardView cardActiveSuccess,
+      @NonNull MaterialCardView cardStep1, @NonNull MaterialCardView cardStep2,
       @NonNull TextInputEditText etTestInput, @NonNull MaterialToolbar topAppBar) {
     this.rootView = rootView;
     this.btnEnableIme = btnEnableIme;
     this.btnOpenAbout = btnOpenAbout;
     this.btnOpenSettings = btnOpenSettings;
     this.btnSelectIme = btnSelectIme;
+    this.btnSwitchKeyboard = btnSwitchKeyboard;
+    this.cardActiveSuccess = cardActiveSuccess;
+    this.cardStep1 = cardStep1;
+    this.cardStep2 = cardStep2;
     this.etTestInput = etTestInput;
     this.topAppBar = topAppBar;
   }
@@ -103,6 +122,30 @@ public final class ActivityMainBinding implements ViewBinding {
         break missingId;
       }
 
+      id = R.id.btnSwitchKeyboard;
+      MaterialButton btnSwitchKeyboard = ViewBindings.findChildViewById(rootView, id);
+      if (btnSwitchKeyboard == null) {
+        break missingId;
+      }
+
+      id = R.id.cardActiveSuccess;
+      MaterialCardView cardActiveSuccess = ViewBindings.findChildViewById(rootView, id);
+      if (cardActiveSuccess == null) {
+        break missingId;
+      }
+
+      id = R.id.cardStep1;
+      MaterialCardView cardStep1 = ViewBindings.findChildViewById(rootView, id);
+      if (cardStep1 == null) {
+        break missingId;
+      }
+
+      id = R.id.cardStep2;
+      MaterialCardView cardStep2 = ViewBindings.findChildViewById(rootView, id);
+      if (cardStep2 == null) {
+        break missingId;
+      }
+
       id = R.id.etTestInput;
       TextInputEditText etTestInput = ViewBindings.findChildViewById(rootView, id);
       if (etTestInput == null) {
@@ -116,7 +159,8 @@ public final class ActivityMainBinding implements ViewBinding {
       }
 
       return new ActivityMainBinding((CoordinatorLayout) rootView, btnEnableIme, btnOpenAbout,
-          btnOpenSettings, btnSelectIme, etTestInput, topAppBar);
+          btnOpenSettings, btnSelectIme, btnSwitchKeyboard, cardActiveSuccess, cardStep1, cardStep2,
+          etTestInput, topAppBar);
     }
     String missingId = rootView.getResources().getResourceName(id);
     throw new NullPointerException("Missing required view with ID: ".concat(missingId));

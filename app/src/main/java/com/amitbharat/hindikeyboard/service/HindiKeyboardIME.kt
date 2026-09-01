@@ -6,9 +6,9 @@ import android.speech.RecognizerIntent
 import android.view.KeyEvent
 import android.view.View
 import android.view.inputmethod.EditorInfo
-import android.view.inputmethod.InputConnection
 import androidx.compose.runtime.*
 import androidx.compose.ui.platform.ComposeView
+import androidx.compose.ui.platform.ViewCompositionStrategy
 import androidx.lifecycle.*
 import androidx.savedstate.SavedStateRegistry
 import androidx.savedstate.SavedStateRegistryController
@@ -31,6 +31,7 @@ class HindiKeyboardIME : InputMethodService(), LifecycleOwner, ViewModelStoreOwn
     override val viewModelStore: ViewModelStore get() = store
     override val savedStateRegistry: SavedStateRegistry get() = savedStateRegistryController.savedStateRegistry
 
+    private var composeView: ComposeView? = null
     private var keyboardState by mutableStateOf(KeyboardUiState())
     private var composingWord = StringBuilder()
 
@@ -40,44 +41,62 @@ class HindiKeyboardIME : InputMethodService(), LifecycleOwner, ViewModelStoreOwn
         lifecycleRegistry.handleLifecycleEvent(Lifecycle.Event.ON_CREATE)
     }
 
+    // Disable full screen extract mode to avoid flickering / window resizing blinking on devices
+    override fun onEvaluateFullscreenMode(): Boolean = false
+    override fun onEvaluateInputViewShown(): Boolean = true
+
     override fun onCreateInputView(): View {
-        lifecycleRegistry.handleLifecycleEvent(Lifecycle.Event.ON_START)
-        lifecycleRegistry.handleLifecycleEvent(Lifecycle.Event.ON_RESUME)
+        window?.window?.decorView?.let { decor ->
+            decor.setViewTreeLifecycleOwner(this)
+            decor.setViewTreeViewModelStoreOwner(this)
+            decor.setViewTreeSavedStateRegistryOwner(this)
+        }
 
-        val composeView = ComposeView(this).apply {
-            setViewTreeLifecycleOwner(this@HindiKeyboardIME)
-            setViewTreeViewModelStoreOwner(this@HindiKeyboardIME)
-            setViewTreeSavedStateRegistryOwner(this@HindiKeyboardIME)
+        if (composeView == null) {
+            composeView = ComposeView(this).apply {
+                setViewCompositionStrategy(ViewCompositionStrategy.DisposeOnLifecycleDestroyed(this@HindiKeyboardIME.lifecycle))
+                setViewTreeLifecycleOwner(this@HindiKeyboardIME)
+                setViewTreeViewModelStoreOwner(this@HindiKeyboardIME)
+                setViewTreeSavedStateRegistryOwner(this@HindiKeyboardIME)
 
-            setContent {
-                KeyboardScreen(
-                    state = keyboardState,
-                    onKeyPress = { text -> handleText(text) },
-                    onBackspace = { handleBackspace() },
-                    onSpace = { handleSpace() },
-                    onEnter = { handleEnter() },
-                    onLanguageToggle = { handleLanguageToggle() },
-                    onShiftToggle = { handleShiftToggle() },
-                    onLayoutChange = { layout -> keyboardState = keyboardState.copy(layoutType = layout) },
-                    onSuggestionClick = { word -> handleSuggestionClick(word) },
-                    onCursorMove = { offset -> handleCursorMove(offset) },
-                    onVoiceClick = { launchVoiceTyping() },
-                    onSettingsClick = { launchSettings() },
-                    imeAction = currentInputEditorInfo?.imeOptions?.and(EditorInfo.IME_MASK_ACTION) ?: EditorInfo.IME_ACTION_DONE
-                )
+                setContent {
+                    KeyboardScreen(
+                        state = keyboardState,
+                        onKeyPress = { text -> handleText(text) },
+                        onBackspace = { handleBackspace() },
+                        onSpace = { handleSpace() },
+                        onEnter = { handleEnter() },
+                        onLanguageToggle = { handleLanguageToggle() },
+                        onShiftToggle = { handleShiftToggle() },
+                        onLayoutChange = { layout -> keyboardState = keyboardState.copy(layoutType = layout) },
+                        onSuggestionClick = { word -> handleSuggestionClick(word) },
+                        onCursorMove = { offset -> handleCursorMove(offset) },
+                        onVoiceClick = { launchVoiceTyping() },
+                        onSettingsClick = { launchSettings() },
+                        imeAction = currentInputEditorInfo?.imeOptions?.and(EditorInfo.IME_MASK_ACTION) ?: EditorInfo.IME_ACTION_DONE
+                    )
+                }
             }
         }
-        return composeView
+        return composeView!!
     }
 
     override fun onStartInputView(info: EditorInfo?, restarting: Boolean) {
         super.onStartInputView(info, restarting)
+        if (lifecycleRegistry.currentState.isAtLeast(Lifecycle.State.CREATED)) {
+            lifecycleRegistry.handleLifecycleEvent(Lifecycle.Event.ON_START)
+            lifecycleRegistry.handleLifecycleEvent(Lifecycle.Event.ON_RESUME)
+        }
         composingWord.clear()
         updateSuggestions()
     }
 
     override fun onFinishInputView(finishingInput: Boolean) {
         super.onFinishInputView(finishingInput)
+        if (lifecycleRegistry.currentState.isAtLeast(Lifecycle.State.RESUMED)) {
+            lifecycleRegistry.handleLifecycleEvent(Lifecycle.Event.ON_PAUSE)
+            lifecycleRegistry.handleLifecycleEvent(Lifecycle.Event.ON_STOP)
+        }
         composingWord.clear()
     }
 
@@ -90,16 +109,13 @@ class HindiKeyboardIME : InputMethodService(), LifecycleOwner, ViewModelStoreOwn
         if (text.length == 1 && text.first().isLetter()) {
             composingWord.append(text)
             updateSuggestions()
-            // In Hindi mode, we hold composing text or commit as needed
             ic.commitText(text, 1)
         } else {
-            // Emojis or words or symbols
             ic.commitText(text, 1)
             composingWord.clear()
             updateSuggestions()
         }
 
-        // Reset shift if was singular ON
         if (keyboardState.shiftState == ShiftState.ON) {
             keyboardState = keyboardState.copy(shiftState = ShiftState.OFF)
         }
@@ -124,11 +140,9 @@ class HindiKeyboardIME : InputMethodService(), LifecycleOwner, ViewModelStoreOwn
 
         val ic = currentInputConnection ?: return
 
-        // If in Hindi mode and top suggestion exists, auto-convert current typed word to Hindi
         if (keyboardState.typingMode == TypingMode.HINDI_TRANSLITERATION && composingWord.isNotEmpty()) {
             val top = keyboardState.suggestions.firstOrNull()
             if (top != null) {
-                // Delete the English characters typed so far
                 val len = composingWord.length
                 ic.deleteSurroundingText(len, 0)
                 ic.commitText(top + " ", 1)
@@ -232,7 +246,9 @@ class HindiKeyboardIME : InputMethodService(), LifecycleOwner, ViewModelStoreOwn
     }
 
     override fun onDestroy() {
-        lifecycleRegistry.handleLifecycleEvent(Lifecycle.Event.ON_DESTROY)
+        if (lifecycleRegistry.currentState.isAtLeast(Lifecycle.State.INITIALIZED)) {
+            lifecycleRegistry.handleLifecycleEvent(Lifecycle.Event.ON_DESTROY)
+        }
         super.onDestroy()
     }
 }
