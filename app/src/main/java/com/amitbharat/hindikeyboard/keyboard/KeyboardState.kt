@@ -7,8 +7,7 @@ enum class KeyboardLayoutType {
     QWERTY,
     SYMBOLS,
     MORE_SYMBOLS,
-    EMOJI,
-    CLIPBOARD
+    EMOJI
 }
 
 enum class ShiftState {
@@ -27,5 +26,6 @@ data class KeyboardUiState(
     val enableVibration: Boolean = true,
     val enableSound: Boolean = false,
     val activeTheme: ThemeType = ThemeType.SYSTEM_DEFAULT,
-    val isListeningVoice: Boolean = false
+    val isListeningVoice: Boolean = false,
+    val voicePartialText: String = ""
 )

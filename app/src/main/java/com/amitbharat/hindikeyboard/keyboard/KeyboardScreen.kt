@@ -48,7 +48,7 @@ fun KeyboardScreen(
     val isDark = isSystemInDarkTheme()
     val colors = KeyboardThemeManager.getColors(state.activeTheme, isDark)
 
-    // Comfortable elevated bottom padding to stay clearly above navigation bar / gesture pill
+    // Elevated bottom padding to stay cleanly above device navigation bar
     val navBottomPadding = WindowInsets.navigationBars.asPaddingValues().calculateBottomPadding()
     val bottomInset = if (navBottomPadding > 0.dp) navBottomPadding + 8.dp else 22.dp
 
@@ -58,19 +58,19 @@ fun KeyboardScreen(
             .background(colors.background)
             .padding(bottom = bottomInset)
     ) {
-        // 1. Suggestion & Shortcut Bar
+        // 1. Suggestion & Voice Action Bar (Clean - No Clipboard)
         SuggestionBar(
             suggestions = state.suggestions,
             mode = state.typingMode,
             isListeningVoice = state.isListeningVoice,
+            voicePartialText = state.voicePartialText,
             colors = colors,
             onSuggestionClick = onSuggestionClick,
             onLayoutChange = onLayoutChange,
-            onVoiceClick = onVoiceClick,
-            onSettingsClick = onSettingsClick
+            onVoiceClick = onVoiceClick
         )
 
-        // 2. Keyboard Views (QWERTY, Symbols, Emoji, Clipboard)
+        // 2. Keyboard Views (QWERTY, Symbols, Emoji)
         when (state.layoutType) {
             KeyboardLayoutType.QWERTY -> {
                 QwertyLayout(
@@ -119,13 +119,6 @@ fun KeyboardScreen(
                     onBackToQwerty = { onLayoutChange(KeyboardLayoutType.QWERTY) }
                 )
             }
-            KeyboardLayoutType.CLIPBOARD -> {
-                ClipboardLayout(
-                    colors = colors,
-                    onPaste = onKeyPress,
-                    onBackToQwerty = { onLayoutChange(KeyboardLayoutType.QWERTY) }
-                )
-            }
         }
     }
 }
@@ -135,48 +128,47 @@ fun SuggestionBar(
     suggestions: List<String>,
     mode: TypingMode,
     isListeningVoice: Boolean = false,
+    voicePartialText: String = "",
     colors: KeyboardColors,
     onSuggestionClick: (String) -> Unit,
     onLayoutChange: (KeyboardLayoutType) -> Unit,
-    onVoiceClick: () -> Unit,
-    onSettingsClick: () -> Unit
+    onVoiceClick: () -> Unit
 ) {
+    val isHindi = mode == TypingMode.HINDI_TRANSLITERATION
+
     Row(
         modifier = Modifier
             .fillMaxWidth()
             .height(46.dp)
             .background(colors.suggestionBarBackground)
-            .padding(horizontal = 4.dp),
+            .padding(horizontal = 6.dp),
         verticalAlignment = Alignment.CenterVertically
     ) {
-        // Quick Action Icons
-        IconButton(
-            onClick = { onLayoutChange(KeyboardLayoutType.CLIPBOARD) },
-            modifier = Modifier.size(38.dp)
-        ) {
-            Icon(Icons.Default.ContentPaste, contentDescription = "Clipboard", tint = colors.specialKeyTextColor, modifier = Modifier.size(20.dp))
-        }
-
+        // Emoji Button on Left
         IconButton(
             onClick = { onLayoutChange(KeyboardLayoutType.EMOJI) },
             modifier = Modifier.size(38.dp)
         ) {
-            Icon(Icons.Default.EmojiEmotions, contentDescription = "Emoji", tint = colors.specialKeyTextColor, modifier = Modifier.size(20.dp))
+            Icon(Icons.Default.EmojiEmotions, contentDescription = "Emoji", tint = colors.specialKeyTextColor, modifier = Modifier.size(22.dp))
         }
 
-        // Suggestions List or Voice Listening Indicator
+        // Live Voice Typing Stream or Suggestions List
         if (isListeningVoice) {
-            Box(
+            Row(
                 modifier = Modifier
                     .weight(1f)
-                    .fillMaxHeight(),
-                contentAlignment = Alignment.Center
+                    .fillMaxHeight()
+                    .padding(horizontal = 8.dp),
+                verticalAlignment = Alignment.CenterVertically
             ) {
+                Text("🎙️", fontSize = 18.sp)
+                Spacer(Modifier.width(6.dp))
                 Text(
-                    text = "🎙️ Listening… Speak now",
+                    text = if (voicePartialText.isNotEmpty()) voicePartialText else if (isHindi) "बोलिए... (Hindi Voice Typing)" else "Speak now... (English Voice Typing)",
                     color = Color(0xFFE53935),
                     fontSize = 15.sp,
-                    fontWeight = FontWeight.Bold
+                    fontWeight = FontWeight.Bold,
+                    maxLines = 1
                 )
             }
         } else {
@@ -199,7 +191,7 @@ fun SuggestionBar(
                         Text(
                             text = item,
                             color = colors.suggestionTextColor,
-                            fontSize = 16.sp,
+                            fontSize = 17.sp,
                             fontWeight = FontWeight.Medium
                         )
                     }
@@ -207,16 +199,16 @@ fun SuggestionBar(
             }
         }
 
-        // Voice Typing Button (Toggles Voice Listening)
+        // Live Continuous Voice Mic Button
         IconButton(
             onClick = onVoiceClick,
             modifier = Modifier.size(38.dp)
         ) {
             Icon(
                 Icons.Default.Mic,
-                contentDescription = "Voice",
+                contentDescription = "Voice Input",
                 tint = if (isListeningVoice) Color(0xFFE53935) else colors.accentColor,
-                modifier = Modifier.size(22.dp)
+                modifier = Modifier.size(24.dp)
             )
         }
     }
@@ -246,24 +238,24 @@ fun QwertyLayout(
             .fillMaxWidth()
             .padding(horizontal = 2.dp, vertical = 2.dp)
     ) {
-        // Optional Dedicated Number Row (Taller)
+        // Dedicated Number Row (Larger Font 22sp)
         if (state.showNumberRow) {
             Row(modifier = Modifier.fillMaxWidth().height(48.dp)) {
                 numberRow.forEach { num ->
-                    KeyItem(text = num, modifier = Modifier.weight(1f), colors = colors, fontSize = 19.sp, onClick = { onKeyPress(num) })
+                    KeyItem(text = num, modifier = Modifier.weight(1f), colors = colors, fontSize = 22.sp, onClick = { onKeyPress(num) })
                 }
             }
         }
 
-        // Row 1 (Q W E R T Y U I O P) - Height 54dp
+        // Row 1 (Q W E R T Y U I O P) - Larger Font 25sp
         Row(modifier = Modifier.fillMaxWidth().height(54.dp)) {
             row1.forEach { char ->
                 val displayText = if (state.shiftState != ShiftState.OFF) char.uppercase() else char
-                KeyItem(text = displayText, modifier = Modifier.weight(1f), colors = colors, onClick = { onKeyPress(displayText) })
+                KeyItem(text = displayText, modifier = Modifier.weight(1f), colors = colors, fontSize = 25.sp, onClick = { onKeyPress(displayText) })
             }
         }
 
-        // Row 2 (A S D F G H J K L) - Height 54dp
+        // Row 2 (A S D F G H J K L) - Larger Font 25sp
         Row(
             modifier = Modifier
                 .fillMaxWidth()
@@ -272,11 +264,11 @@ fun QwertyLayout(
         ) {
             row2.forEach { char ->
                 val displayText = if (state.shiftState != ShiftState.OFF) char.uppercase() else char
-                KeyItem(text = displayText, modifier = Modifier.weight(1f), colors = colors, onClick = { onKeyPress(displayText) })
+                KeyItem(text = displayText, modifier = Modifier.weight(1f), colors = colors, fontSize = 25.sp, onClick = { onKeyPress(displayText) })
             }
         }
 
-        // Row 3 (Shift + Z X C V B N M + Continuous Backspace) - Height 54dp
+        // Row 3 (Shift + Z X C V B N M + Continuous Backspace) - Larger Font 25sp
         Row(modifier = Modifier.fillMaxWidth().height(54.dp)) {
             // Shift Key
             SpecialKeyItem(
@@ -289,13 +281,13 @@ fun QwertyLayout(
                     if (state.shiftState == ShiftState.CAPS_LOCK) Icons.Default.KeyboardCapslock else Icons.Default.ArrowUpward,
                     contentDescription = "Shift",
                     tint = if (state.shiftState != ShiftState.OFF) colors.accentColor else colors.specialKeyTextColor,
-                    modifier = Modifier.size(22.dp)
+                    modifier = Modifier.size(24.dp)
                 )
             }
 
             row3.forEach { char ->
                 val displayText = if (state.shiftState != ShiftState.OFF) char.uppercase() else char
-                KeyItem(text = displayText, modifier = Modifier.weight(1f), colors = colors, onClick = { onKeyPress(displayText) })
+                KeyItem(text = displayText, modifier = Modifier.weight(1f), colors = colors, fontSize = 25.sp, onClick = { onKeyPress(displayText) })
             }
 
             // Continuous Repeating Backspace Key
@@ -304,11 +296,11 @@ fun QwertyLayout(
                 colors = colors,
                 onTrigger = onBackspace
             ) {
-                Icon(Icons.Default.Backspace, contentDescription = "Backspace", tint = colors.specialKeyTextColor, modifier = Modifier.size(22.dp))
+                Icon(Icons.Default.Backspace, contentDescription = "Backspace", tint = colors.specialKeyTextColor, modifier = Modifier.size(24.dp))
             }
         }
 
-        // Row 4 (123, Language Switch Button, Spacebar, Period, Enter) - Height 56dp
+        // Row 4 (?123, HN/EN Toggle Button, Blank Spacebar, Period, Enter) - Height 56dp
         Row(modifier = Modifier.fillMaxWidth().height(56.dp)) {
             // ?123 Symbols Button
             SpecialKeyItem(
@@ -316,10 +308,10 @@ fun QwertyLayout(
                 colors = colors,
                 onClick = { onLayoutChange(KeyboardLayoutType.SYMBOLS) }
             ) {
-                Text("?123", fontWeight = FontWeight.Bold, fontSize = 15.sp, color = colors.specialKeyTextColor)
+                Text("?123", fontWeight = FontWeight.Bold, fontSize = 17.sp, color = colors.specialKeyTextColor)
             }
 
-            // One-Tap EN / Hindi Toggle Button (Icon Key)
+            // Clean HN / EN Text Toggle Button
             val isHindi = state.typingMode == TypingMode.HINDI_TRANSLITERATION
             SpecialKeyItem(
                 modifier = Modifier.weight(1.3f),
@@ -327,30 +319,12 @@ fun QwertyLayout(
                 onClick = onLanguageToggle,
                 isHighlighted = isHindi
             ) {
-                Box(contentAlignment = Alignment.Center) {
-                    Icon(
-                        Icons.Default.Language,
-                        contentDescription = if (isHindi) "Switch to English" else "Switch to Hindi",
-                        tint = if (isHindi) Color.White else colors.specialKeyTextColor,
-                        modifier = Modifier.size(22.dp)
-                    )
-                    // Compact indicator badge
-                    Box(
-                        modifier = Modifier
-                            .align(Alignment.BottomEnd)
-                            .offset(x = 6.dp, y = 6.dp)
-                            .clip(RoundedCornerShape(3.dp))
-                            .background(if (isHindi) Color.White.copy(alpha = 0.3f) else colors.keyTextColor.copy(alpha = 0.15f))
-                            .padding(horizontal = 2.5.dp, vertical = 1.dp)
-                    ) {
-                        Text(
-                            text = if (isHindi) "हि" else "EN",
-                            fontSize = 8.5.sp,
-                            fontWeight = FontWeight.Bold,
-                            color = if (isHindi) Color.White else colors.specialKeyTextColor
-                        )
-                    }
-                }
+                Text(
+                    text = if (isHindi) "HN" else "EN",
+                    fontSize = 16.sp,
+                    fontWeight = FontWeight.Bold,
+                    color = if (isHindi) Color.White else colors.specialKeyTextColor
+                )
             }
 
             // Spacebar (with swipe cursor navigation)
@@ -382,7 +356,7 @@ fun QwertyLayout(
                 contentAlignment = Alignment.Center
             ) {
                 Text(
-                    text = if (isHindi) "हिन्दी (Transliteration)" else "English",
+                    text = "Developed by Amit Bharat",
                     fontSize = 13.5.sp,
                     fontWeight = FontWeight.Medium,
                     color = colors.keyTextColor.copy(alpha = 0.55f)
@@ -390,7 +364,7 @@ fun QwertyLayout(
             }
 
             // Period Key
-            KeyItem(text = ".", modifier = Modifier.weight(1f), colors = colors, fontSize = 20.sp, onClick = { onKeyPress(".") })
+            KeyItem(text = ".", modifier = Modifier.weight(1f), colors = colors, fontSize = 24.sp, onClick = { onKeyPress(".") })
 
             // Enter / Action Key
             SpecialKeyItem(
@@ -406,7 +380,7 @@ fun QwertyLayout(
                     EditorInfo.IME_ACTION_GO -> Icons.Default.ArrowForward
                     else -> Icons.Default.KeyboardReturn
                 }
-                Icon(icon, contentDescription = "Enter", tint = Color.White, modifier = Modifier.size(22.dp))
+                Icon(icon, contentDescription = "Enter", tint = Color.White, modifier = Modifier.size(24.dp))
             }
         }
     }
@@ -429,25 +403,25 @@ fun SymbolsLayout(
 
     Column(modifier = Modifier.fillMaxWidth().padding(horizontal = 2.dp, vertical = 2.dp)) {
         Row(modifier = Modifier.fillMaxWidth().height(54.dp)) {
-            r1.forEach { KeyItem(text = it, modifier = Modifier.weight(1f), colors = colors, fontSize = 20.sp, onClick = { onKeyPress(it) }) }
+            r1.forEach { KeyItem(text = it, modifier = Modifier.weight(1f), colors = colors, fontSize = 23.sp, onClick = { onKeyPress(it) }) }
         }
         Row(modifier = Modifier.fillMaxWidth().height(54.dp)) {
-            r2.forEach { KeyItem(text = it, modifier = Modifier.weight(1f), colors = colors, fontSize = 20.sp, onClick = { onKeyPress(it) }) }
+            r2.forEach { KeyItem(text = it, modifier = Modifier.weight(1f), colors = colors, fontSize = 23.sp, onClick = { onKeyPress(it) }) }
         }
         Row(modifier = Modifier.fillMaxWidth().height(54.dp)) {
             SpecialKeyItem(modifier = Modifier.weight(1.5f), colors = colors, onClick = { onLayoutChange(KeyboardLayoutType.MORE_SYMBOLS) }) {
-                Text("=/<", fontWeight = FontWeight.Bold, fontSize = 15.sp, color = colors.specialKeyTextColor)
+                Text("=/<", fontWeight = FontWeight.Bold, fontSize = 17.sp, color = colors.specialKeyTextColor)
             }
-            r3.forEach { KeyItem(text = it, modifier = Modifier.weight(1f), colors = colors, fontSize = 20.sp, onClick = { onKeyPress(it) }) }
+            r3.forEach { KeyItem(text = it, modifier = Modifier.weight(1f), colors = colors, fontSize = 23.sp, onClick = { onKeyPress(it) }) }
             RepeatingSpecialKeyItem(modifier = Modifier.weight(1.5f), colors = colors, onTrigger = onBackspace) {
-                Icon(Icons.Default.Backspace, contentDescription = "Backspace", tint = colors.specialKeyTextColor, modifier = Modifier.size(22.dp))
+                Icon(Icons.Default.Backspace, contentDescription = "Backspace", tint = colors.specialKeyTextColor, modifier = Modifier.size(24.dp))
             }
         }
         Row(modifier = Modifier.fillMaxWidth().height(56.dp)) {
             SpecialKeyItem(modifier = Modifier.weight(1.5f), colors = colors, onClick = { onLayoutChange(KeyboardLayoutType.QWERTY) }) {
-                Text("ABC", fontWeight = FontWeight.Bold, fontSize = 15.sp, color = colors.specialKeyTextColor)
+                Text("ABC", fontWeight = FontWeight.Bold, fontSize = 17.sp, color = colors.specialKeyTextColor)
             }
-            KeyItem(text = ",", modifier = Modifier.weight(1f), colors = colors, fontSize = 20.sp, onClick = { onKeyPress(",") })
+            KeyItem(text = ",", modifier = Modifier.weight(1f), colors = colors, fontSize = 24.sp, onClick = { onKeyPress(",") })
             Box(
                 modifier = Modifier
                     .weight(4.5f)
@@ -458,11 +432,16 @@ fun SymbolsLayout(
                     .clickable { onSpace() },
                 contentAlignment = Alignment.Center
             ) {
-                Text("Space", fontSize = 13.5.sp, color = colors.keyTextColor.copy(alpha = 0.55f))
+                Text(
+                    text = "Developed by Amit Bharat",
+                    fontSize = 13.5.sp,
+                    fontWeight = FontWeight.Medium,
+                    color = colors.keyTextColor.copy(alpha = 0.55f)
+                )
             }
-            KeyItem(text = ".", modifier = Modifier.weight(1f), colors = colors, fontSize = 20.sp, onClick = { onKeyPress(".") })
+            KeyItem(text = ".", modifier = Modifier.weight(1f), colors = colors, fontSize = 24.sp, onClick = { onKeyPress(".") })
             SpecialKeyItem(modifier = Modifier.weight(1.5f), colors = colors, onClick = onEnter, isHighlighted = true) {
-                Icon(Icons.Default.KeyboardReturn, contentDescription = "Enter", tint = Color.White, modifier = Modifier.size(22.dp))
+                Icon(Icons.Default.KeyboardReturn, contentDescription = "Enter", tint = Color.White, modifier = Modifier.size(24.dp))
             }
         }
     }
@@ -485,25 +464,25 @@ fun MoreSymbolsLayout(
 
     Column(modifier = Modifier.fillMaxWidth().padding(horizontal = 2.dp, vertical = 2.dp)) {
         Row(modifier = Modifier.fillMaxWidth().height(54.dp)) {
-            r1.forEach { KeyItem(text = it, modifier = Modifier.weight(1f), colors = colors, fontSize = 19.sp, onClick = { onKeyPress(it) }) }
+            r1.forEach { KeyItem(text = it, modifier = Modifier.weight(1f), colors = colors, fontSize = 22.sp, onClick = { onKeyPress(it) }) }
         }
         Row(modifier = Modifier.fillMaxWidth().height(54.dp)) {
-            r2.forEach { KeyItem(text = it, modifier = Modifier.weight(1f), colors = colors, fontSize = 19.sp, onClick = { onKeyPress(it) }) }
+            r2.forEach { KeyItem(text = it, modifier = Modifier.weight(1f), colors = colors, fontSize = 22.sp, onClick = { onKeyPress(it) }) }
         }
         Row(modifier = Modifier.fillMaxWidth().height(54.dp)) {
             SpecialKeyItem(modifier = Modifier.weight(1.5f), colors = colors, onClick = { onLayoutChange(KeyboardLayoutType.SYMBOLS) }) {
-                Text("1/2", fontWeight = FontWeight.Bold, fontSize = 15.sp, color = colors.specialKeyTextColor)
+                Text("1/2", fontWeight = FontWeight.Bold, fontSize = 17.sp, color = colors.specialKeyTextColor)
             }
-            r3.forEach { KeyItem(text = it, modifier = Modifier.weight(1f), colors = colors, fontSize = 19.sp, onClick = { onKeyPress(it) }) }
+            r3.forEach { KeyItem(text = it, modifier = Modifier.weight(1f), colors = colors, fontSize = 22.sp, onClick = { onKeyPress(it) }) }
             RepeatingSpecialKeyItem(modifier = Modifier.weight(1.5f), colors = colors, onTrigger = onBackspace) {
-                Icon(Icons.Default.Backspace, contentDescription = "Backspace", tint = colors.specialKeyTextColor, modifier = Modifier.size(22.dp))
+                Icon(Icons.Default.Backspace, contentDescription = "Backspace", tint = colors.specialKeyTextColor, modifier = Modifier.size(24.dp))
             }
         }
         Row(modifier = Modifier.fillMaxWidth().height(56.dp)) {
             SpecialKeyItem(modifier = Modifier.weight(1.5f), colors = colors, onClick = { onLayoutChange(KeyboardLayoutType.QWERTY) }) {
-                Text("ABC", fontWeight = FontWeight.Bold, fontSize = 15.sp, color = colors.specialKeyTextColor)
+                Text("ABC", fontWeight = FontWeight.Bold, fontSize = 17.sp, color = colors.specialKeyTextColor)
             }
-            KeyItem(text = "<", modifier = Modifier.weight(1f), colors = colors, fontSize = 20.sp, onClick = { onKeyPress("<") })
+            KeyItem(text = "<", modifier = Modifier.weight(1f), colors = colors, fontSize = 24.sp, onClick = { onKeyPress("<") })
             Box(
                 modifier = Modifier
                     .weight(4.5f)
@@ -514,11 +493,16 @@ fun MoreSymbolsLayout(
                     .clickable { onSpace() },
                 contentAlignment = Alignment.Center
             ) {
-                Text("Space", fontSize = 13.5.sp, color = colors.keyTextColor.copy(alpha = 0.55f))
+                Text(
+                    text = "Developed by Amit Bharat",
+                    fontSize = 13.5.sp,
+                    fontWeight = FontWeight.Medium,
+                    color = colors.keyTextColor.copy(alpha = 0.55f)
+                )
             }
-            KeyItem(text = ">", modifier = Modifier.weight(1f), colors = colors, fontSize = 20.sp, onClick = { onKeyPress(">") })
+            KeyItem(text = ">", modifier = Modifier.weight(1f), colors = colors, fontSize = 24.sp, onClick = { onKeyPress(">") })
             SpecialKeyItem(modifier = Modifier.weight(1.5f), colors = colors, onClick = onEnter, isHighlighted = true) {
-                Icon(Icons.Default.KeyboardReturn, contentDescription = "Enter", tint = Color.White, modifier = Modifier.size(22.dp))
+                Icon(Icons.Default.KeyboardReturn, contentDescription = "Enter", tint = Color.White, modifier = Modifier.size(24.dp))
             }
         }
     }
@@ -557,7 +541,7 @@ fun EmojiLayout(
                         .clickable { selectedCategory = cat }
                         .padding(horizontal = 10.dp, vertical = 5.dp),
                     color = if (selectedCategory == cat) Color.White else colors.specialKeyTextColor,
-                    fontSize = 13.sp,
+                    fontSize = 14.sp,
                     fontWeight = FontWeight.Bold
                 )
             }
@@ -586,57 +570,9 @@ fun EmojiLayout(
                                 .clickable { onEmojiClick(emoji) },
                             contentAlignment = Alignment.Center
                         ) {
-                            Text(emoji, fontSize = 26.sp)
+                            Text(emoji, fontSize = 28.sp)
                         }
                     }
-                }
-            }
-        }
-    }
-}
-
-@Composable
-fun ClipboardLayout(
-    colors: KeyboardColors,
-    onPaste: (String) -> Unit,
-    onBackToQwerty: () -> Unit
-) {
-    Column(modifier = Modifier.fillMaxWidth().height(260.dp)) {
-        Row(
-            modifier = Modifier
-                .fillMaxWidth()
-                .height(44.dp)
-                .background(colors.suggestionBarBackground)
-                .padding(horizontal = 8.dp),
-            verticalAlignment = Alignment.CenterVertically
-        ) {
-            IconButton(onClick = onBackToQwerty, modifier = Modifier.size(38.dp)) {
-                Icon(Icons.Default.ArrowBack, contentDescription = "Back", tint = colors.specialKeyTextColor)
-            }
-            Text("Clipboard History", color = colors.suggestionTextColor, fontWeight = FontWeight.Bold, fontSize = 15.sp)
-        }
-
-        val sampleClips = listOf(
-            "Namaste! Kaise ho aap?",
-            "Mera naam Amit Bharat hai.",
-            "Rooys Soft Tech - rooyssofttech2020@gmail.com",
-            "Shubh Prabhat! Have a wonderful day.",
-            "Dhanyawad!"
-        )
-
-        LazyRow(modifier = Modifier.fillMaxSize().padding(12.dp)) {
-            items(sampleClips) { clip ->
-                Box(
-                    modifier = Modifier
-                        .width(200.dp)
-                        .fillMaxHeight()
-                        .padding(end = 10.dp)
-                        .clip(RoundedCornerShape(14.dp))
-                        .background(colors.keyBackground)
-                        .clickable { onPaste(clip) }
-                        .padding(14.dp)
-                ) {
-                    Text(clip, color = colors.keyTextColor, fontSize = 14.sp)
                 }
             }
         }
@@ -648,7 +584,7 @@ fun KeyItem(
     text: String,
     modifier: Modifier = Modifier,
     colors: KeyboardColors,
-    fontSize: androidx.compose.ui.unit.TextUnit = 21.sp,
+    fontSize: androidx.compose.ui.unit.TextUnit = 25.sp,
     onClick: () -> Unit
 ) {
     Box(
