@@ -19,6 +19,7 @@
         <activity
             android:name=".settings.SplashActivity"
             android:exported="true"
+            android:configChanges="locale|layoutDirection|orientation|screenSize"
             android:theme="@style/Theme.HindiKeyboard.Splash">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
@@ -30,18 +31,21 @@
         <activity
             android:name=".settings.MainActivity"
             android:exported="true"
+            android:configChanges="locale|layoutDirection|orientation|screenSize"
             android:label="@string/app_name" />
 
         <!-- Settings Activity -->
         <activity
             android:name=".settings.SettingsActivity"
             android:exported="false"
+            android:configChanges="locale|layoutDirection|orientation|screenSize"
             android:label="@string/action_settings" />
 
         <!-- About Activity -->
         <activity
             android:name=".settings.AboutActivity"
             android:exported="false"
+            android:configChanges="locale|layoutDirection|orientation|screenSize"
             android:label="@string/action_about" />
 
         <!-- FileProvider for Sharing APK -->
