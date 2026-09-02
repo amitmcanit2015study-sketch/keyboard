@@ -2,6 +2,7 @@ package com.amitbharat.hindikeyboard
 
 import android.app.Application
 import com.amitbharat.hindikeyboard.database.KeyboardDatabase
+import com.amitbharat.hindikeyboard.utils.ThemeUtils
 
 class IndicBoardApp : Application() {
 
@@ -12,10 +13,10 @@ class IndicBoardApp : Application() {
             private set
     }
 
-    @Override
     override fun onCreate() {
         super.onCreate()
         instance = this
         database = KeyboardDatabase.getDatabase(this)
+        ThemeUtils.applyTheme(this)
     }
 }

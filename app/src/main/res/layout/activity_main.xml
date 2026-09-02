@@ -6,6 +6,7 @@
     android:background="?android:colorBackground">
 
     <com.google.android.material.appbar.AppBarLayout
+        android:id="@+id/appBarLayout"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:background="?attr/colorSurface">
@@ -17,7 +18,8 @@
             app:title="@string/app_name"
             app:subtitle="@string/app_header_subtitle"
             app:titleTextAppearance="@style/TextAppearance.Material3.TitleLarge"
-            app:subtitleTextAppearance="@style/TextAppearance.Material3.BodySmall" />
+            app:subtitleTextAppearance="@style/TextAppearance.Material3.BodySmall"
+            app:menu="@menu/main_menu" />
 
     </com.google.android.material.appbar.AppBarLayout>
 
@@ -30,7 +32,7 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:orientation="vertical"
-            android:padding="20dp">
+            android:padding="16dp">
 
             <!-- Active Keyboard Success Banner -->
             <com.google.android.material.card.MaterialCardView
@@ -38,22 +40,24 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:visibility="gone"
-                app:cardCornerRadius="20dp"
+                app:cardCornerRadius="18dp"
                 app:cardElevation="2dp"
-                app:cardBackgroundColor="#E8F5E9">
+                app:strokeWidth="1dp"
+                app:strokeColor="@color/card_stroke_light"
+                app:cardBackgroundColor="@color/status_green_bg">
 
                 <LinearLayout
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:orientation="vertical"
-                    android:padding="20dp">
+                    android:padding="18dp">
 
                     <TextView
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:text="✓ Indic Keyboard is Active!"
                         android:textAppearance="@style/TextAppearance.Material3.TitleMedium"
-                        android:textColor="#1B5E20"
+                        android:textColor="@color/status_green_text"
                         android:textStyle="bold" />
 
                     <TextView
@@ -61,16 +65,16 @@
                         android:layout_height="wrap_content"
                         android:layout_marginTop="4dp"
                         android:text="Indic Keyboard is set as your default keyboard across all apps."
-                        android:textColor="#2E7D32"
-                        android:textSize="13.5sp" />
+                        android:textColor="@color/status_green_subtext"
+                        android:textSize="13sp" />
 
                     <com.google.android.material.button.MaterialButton
                         android:id="@+id/btnSwitchKeyboard"
                         style="@style/Widget.Material3.Button.TonalButton"
                         android:layout_width="wrap_content"
-                        android:layout_height="42dp"
+                        android:layout_height="40dp"
                         android:layout_marginTop="12dp"
-                        android:text="Change Default Keyboard" />
+                        android:text="@string/btn_select_ime" />
 
                 </LinearLayout>
             </com.google.android.material.card.MaterialCardView>
@@ -88,7 +92,7 @@
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:orientation="vertical"
-                    android:padding="20dp">
+                    android:padding="18dp">
 
                     <TextView
                         android:layout_width="wrap_content"
@@ -104,7 +108,7 @@
                         android:layout_marginTop="4dp"
                         android:text="@string/step_1_desc"
                         android:textColor="?attr/colorOnPrimaryContainer"
-                        android:textSize="13.5sp" />
+                        android:textSize="13sp" />
 
                     <com.google.android.material.button.MaterialButton
                         android:id="@+id/btnEnableIme"
@@ -122,6 +126,7 @@
                 android:id="@+id/cardStep2"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
+                android:layout_marginTop="12dp"
                 android:visibility="gone"
                 app:cardCornerRadius="18dp"
                 app:cardElevation="2dp"
@@ -131,7 +136,7 @@
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:orientation="vertical"
-                    android:padding="20dp">
+                    android:padding="18dp">
 
                     <TextView
                         android:layout_width="wrap_content"
@@ -145,9 +150,9 @@
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:layout_marginTop="4dp"
-                        android:text="Select Indic Keyboard to use it as default keyboard across all apps."
+                        android:text="@string/step_2_desc"
                         android:textColor="?attr/colorOnPrimaryContainer"
-                        android:textSize="13.5sp" />
+                        android:textSize="13sp" />
 
                     <com.google.android.material.button.MaterialButton
                         android:id="@+id/btnSelectIme"
@@ -155,17 +160,17 @@
                         android:layout_width="match_parent"
                         android:layout_height="48dp"
                         android:layout_marginTop="14dp"
-                        android:text="Set as Default Keyboard" />
+                        android:text="@string/btn_select_ime" />
 
                 </LinearLayout>
             </com.google.android.material.card.MaterialCardView>
 
-            <!-- Step 3: Test Typing Pad -->
+            <!-- Step 3: Interactive Live Typing Pad -->
             <com.google.android.material.card.MaterialCardView
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_marginTop="16dp"
-                app:cardCornerRadius="16dp"
+                app:cardCornerRadius="18dp"
                 app:cardElevation="1dp"
                 app:cardBackgroundColor="?attr/colorSurfaceVariant">
 
@@ -206,31 +211,43 @@
                 </LinearLayout>
             </com.google.android.material.card.MaterialCardView>
 
-            <!-- Navigation Actions: Settings & About -->
+            <!-- Quick Action Cards (Theme, Settings, About) -->
             <LinearLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_marginTop="20dp"
+                android:layout_marginTop="16dp"
                 android:orientation="horizontal">
 
                 <com.google.android.material.button.MaterialButton
-                    android:id="@+id/btnOpenSettings"
-                    style="@style/Widget.Material3.Button.OutlinedButton"
+                    android:id="@+id/btnQuickTheme"
+                    style="@style/Widget.Material3.Button.TonalButton"
                     android:layout_width="0dp"
-                    android:layout_height="50dp"
+                    android:layout_height="48dp"
                     android:layout_weight="1"
-                    android:layout_marginEnd="6dp"
+                    android:layout_marginEnd="4dp"
+                    android:text="@string/pref_theme_title"
+                    app:icon="@drawable/ic_palette" />
+
+                <com.google.android.material.button.MaterialButton
+                    android:id="@+id/btnOpenSettings"
+                    style="@style/Widget.Material3.Button.TonalButton"
+                    android:layout_width="0dp"
+                    android:layout_height="48dp"
+                    android:layout_weight="1"
+                    android:layout_marginStart="4dp"
+                    android:layout_marginEnd="4dp"
                     android:text="@string/action_settings"
                     app:icon="@drawable/ic_settings" />
 
                 <com.google.android.material.button.MaterialButton
                     android:id="@+id/btnOpenAbout"
-                    style="@style/Widget.Material3.Button.OutlinedButton"
+                    style="@style/Widget.Material3.Button.TonalButton"
                     android:layout_width="0dp"
-                    android:layout_height="50dp"
+                    android:layout_height="48dp"
                     android:layout_weight="1"
-                    android:layout_marginStart="6dp"
-                    android:text="@string/action_about" />
+                    android:layout_marginStart="4dp"
+                    android:text="@string/action_about"
+                    app:icon="@drawable/ic_info" />
 
             </LinearLayout>
 

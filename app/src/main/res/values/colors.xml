@@ -48,7 +48,12 @@
     <color name="md_theme_dark_onSurfaceVariant">#C7C5D0</color>
     <color name="md_theme_dark_outline">#91909A</color>
 
-    <!-- Gradients -->
+    <!-- Gradients & Accents -->
     <color name="gradient_start">#3B50DF</color>
     <color name="gradient_end">#8F39D6</color>
+    <color name="card_stroke_light">#E0E0E6</color>
+    <color name="card_stroke_dark">#2C2D35</color>
+    <color name="status_green_bg">#E8F5E9</color>
+    <color name="status_green_text">#1B5E20</color>
+    <color name="status_green_subtext">#2E7D32</color>
 </resources>

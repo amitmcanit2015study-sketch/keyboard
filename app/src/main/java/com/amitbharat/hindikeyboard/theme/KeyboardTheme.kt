@@ -3,6 +3,7 @@ package com.amitbharat.hindikeyboard.theme
 import androidx.compose.ui.graphics.Color
 
 enum class ThemeType {
+    SYSTEM_DEFAULT,
     MATERIAL_LIGHT,
     MATERIAL_DARK,
     AMOLED_BLACK,
@@ -23,8 +24,15 @@ data class KeyboardColors(
 )
 
 object KeyboardThemeManager {
-    fun getColors(theme: ThemeType): KeyboardColors {
-        return when (theme) {
+    fun getColors(theme: ThemeType, isSystemDark: Boolean = false): KeyboardColors {
+        val effectiveTheme = if (theme == ThemeType.SYSTEM_DEFAULT) {
+            if (isSystemDark) ThemeType.MATERIAL_DARK else ThemeType.MATERIAL_LIGHT
+        } else {
+            theme
+        }
+
+        return when (effectiveTheme) {
+            ThemeType.SYSTEM_DEFAULT,
             ThemeType.MATERIAL_LIGHT -> KeyboardColors(
                 background = Color(0xFFECEFF1),
                 keyBackground = Color(0xFFFFFFFF),

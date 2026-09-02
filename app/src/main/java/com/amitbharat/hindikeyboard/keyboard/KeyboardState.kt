@@ -26,5 +26,5 @@ data class KeyboardUiState(
     val showNumberRow: Boolean = true,
     val enableVibration: Boolean = true,
     val enableSound: Boolean = false,
-    val activeTheme: ThemeType = ThemeType.MATERIAL_LIGHT
+    val activeTheme: ThemeType = ThemeType.SYSTEM_DEFAULT
 )

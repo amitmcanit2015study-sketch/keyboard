@@ -7,6 +7,7 @@ import androidx.compose.foundation.gestures.detectDragGestures
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.*
@@ -42,7 +43,8 @@ fun KeyboardScreen(
     onSettingsClick: () -> Unit,
     imeAction: Int = EditorInfo.IME_ACTION_DONE
 ) {
-    val colors = KeyboardThemeManager.getColors(state.activeTheme)
+    val isDark = isSystemInDarkTheme()
+    val colors = KeyboardThemeManager.getColors(state.activeTheme, isDark)
 
     Column(
         modifier = Modifier
@@ -288,32 +290,37 @@ fun QwertyLayout(
                 Text("?123", fontWeight = FontWeight.Bold, fontSize = 14.sp, color = colors.specialKeyTextColor)
             }
 
-            // One-Tap EN / Hindi Toggle Button
+            // One-Tap EN / Hindi Toggle Button (Icon Key)
             val isHindi = state.typingMode == TypingMode.HINDI_TRANSLITERATION
-            Box(
-                modifier = Modifier
-                    .weight(1.6f)
-                    .fillMaxHeight()
-                    .padding(2.dp)
-                    .clip(RoundedCornerShape(8.dp))
-                    .background(if (isHindi) colors.accentColor else colors.specialKeyBackground)
-                    .clickable { onLanguageToggle() },
-                contentAlignment = Alignment.Center
+            SpecialKeyItem(
+                modifier = Modifier.weight(1.3f),
+                colors = colors,
+                onClick = onLanguageToggle,
+                isHighlighted = isHindi
             ) {
-                Row(verticalAlignment = Alignment.CenterVertically) {
+                Box(contentAlignment = Alignment.Center) {
                     Icon(
                         Icons.Default.Language,
-                        contentDescription = "Language",
+                        contentDescription = if (isHindi) "Switch to English" else "Switch to Hindi",
                         tint = if (isHindi) Color.White else colors.specialKeyTextColor,
-                        modifier = Modifier.size(16.dp)
+                        modifier = Modifier.size(20.dp)
                     )
-                    Spacer(modifier = Modifier.width(4.dp))
-                    Text(
-                        text = if (isHindi) "हिन्दी" else "English",
-                        fontWeight = FontWeight.Bold,
-                        fontSize = 13.5.sp,
-                        color = if (isHindi) Color.White else colors.specialKeyTextColor
-                    )
+                    // Compact indicator badge
+                    Box(
+                        modifier = Modifier
+                            .align(Alignment.BottomEnd)
+                            .offset(x = 6.dp, y = 6.dp)
+                            .clip(RoundedCornerShape(3.dp))
+                            .background(if (isHindi) Color.White.copy(alpha = 0.25f) else colors.keyTextColor.copy(alpha = 0.12f))
+                            .padding(horizontal = 2.dp, vertical = 0.5.dp)
+                    ) {
+                        Text(
+                            text = if (isHindi) "हि" else "EN",
+                            fontSize = 8.sp,
+                            fontWeight = FontWeight.Bold,
+                            color = if (isHindi) Color.White else colors.specialKeyTextColor
+                        )
+                    }
                 }
             }
 
@@ -321,7 +328,7 @@ fun QwertyLayout(
             var dragAccumulator by remember { mutableFloatStateOf(0f) }
             Box(
                 modifier = Modifier
-                    .weight(4.0f)
+                    .weight(4.4f)
                     .fillMaxHeight()
                     .padding(2.dp)
                     .clip(RoundedCornerShape(8.dp))

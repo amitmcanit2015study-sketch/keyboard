@@ -19,6 +19,7 @@ import com.amitbharat.hindikeyboard.settings.SettingsActivity
 import com.amitbharat.hindikeyboard.suggestions.SuggestionEngine
 import com.amitbharat.hindikeyboard.suggestions.TypingMode
 import com.amitbharat.hindikeyboard.theme.ThemeType
+import com.amitbharat.hindikeyboard.utils.PreferencesManager
 import com.amitbharat.hindikeyboard.utils.SoundHapticHelper
 
 class HindiKeyboardIME : InputMethodService(), LifecycleOwner, ViewModelStoreOwner, SavedStateRegistryOwner {
@@ -39,6 +40,17 @@ class HindiKeyboardIME : InputMethodService(), LifecycleOwner, ViewModelStoreOwn
         super.onCreate()
         savedStateRegistryController.performRestore(null)
         lifecycleRegistry.handleLifecycleEvent(Lifecycle.Event.ON_CREATE)
+        loadPreferences()
+    }
+
+    private fun loadPreferences() {
+        val prefs = PreferencesManager.getInstance(this)
+        keyboardState = keyboardState.copy(
+            activeTheme = prefs.getKeyboardTheme(),
+            showNumberRow = prefs.isNumberRowEnabled(),
+            enableVibration = prefs.isVibrationEnabled(),
+            enableSound = prefs.isSoundEnabled()
+        )
     }
 
     // Disable full screen extract mode to avoid flickering / window resizing blinking on devices
@@ -83,6 +95,7 @@ class HindiKeyboardIME : InputMethodService(), LifecycleOwner, ViewModelStoreOwn
 
     override fun onStartInputView(info: EditorInfo?, restarting: Boolean) {
         super.onStartInputView(info, restarting)
+        loadPreferences()
         if (lifecycleRegistry.currentState.isAtLeast(Lifecycle.State.CREATED)) {
             lifecycleRegistry.handleLifecycleEvent(Lifecycle.Event.ON_START)
             lifecycleRegistry.handleLifecycleEvent(Lifecycle.Event.ON_RESUME)
