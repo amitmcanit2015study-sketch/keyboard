@@ -2,17 +2,23 @@ package com.amitbharat.hindikeyboard.service
 
 import android.content.Intent
 import android.inputmethodservice.InputMethodService
+import android.os.Bundle
+import android.os.Handler
+import android.os.Looper
+import android.speech.RecognitionListener
 import android.speech.RecognizerIntent
+import android.speech.SpeechRecognizer
 import android.view.KeyEvent
 import android.view.View
 import android.view.inputmethod.EditorInfo
+import android.widget.Toast
 import androidx.compose.runtime.*
 import androidx.compose.ui.platform.ComposeView
 import androidx.compose.ui.platform.ViewCompositionStrategy
 import androidx.lifecycle.*
 import androidx.savedstate.SavedStateRegistry
-import androidx.savedstate.SavedStateRegistryController
 import androidx.savedstate.SavedStateRegistryOwner
+import androidx.savedstate.SavedStateRegistryController
 import androidx.savedstate.setViewTreeSavedStateRegistryOwner
 import com.amitbharat.hindikeyboard.keyboard.*
 import com.amitbharat.hindikeyboard.settings.SettingsActivity
@@ -35,6 +41,8 @@ class HindiKeyboardIME : InputMethodService(), LifecycleOwner, ViewModelStoreOwn
     private var composeView: ComposeView? = null
     private var keyboardState by mutableStateOf(KeyboardUiState())
     private var composingWord = StringBuilder()
+    private var speechRecognizer: SpeechRecognizer? = null
+    private val mainHandler = Handler(Looper.getMainLooper())
 
     override fun onCreate() {
         super.onCreate()
@@ -83,7 +91,7 @@ class HindiKeyboardIME : InputMethodService(), LifecycleOwner, ViewModelStoreOwn
                         onLayoutChange = { layout -> keyboardState = keyboardState.copy(layoutType = layout) },
                         onSuggestionClick = { word -> handleSuggestionClick(word) },
                         onCursorMove = { offset -> handleCursorMove(offset) },
-                        onVoiceClick = { launchVoiceTyping() },
+                        onVoiceClick = { toggleVoiceTyping() },
                         onSettingsClick = { launchSettings() },
                         imeAction = currentInputEditorInfo?.imeOptions?.and(EditorInfo.IME_MASK_ACTION) ?: EditorInfo.IME_ACTION_DONE
                     )
@@ -106,6 +114,7 @@ class HindiKeyboardIME : InputMethodService(), LifecycleOwner, ViewModelStoreOwn
 
     override fun onFinishInputView(finishingInput: Boolean) {
         super.onFinishInputView(finishingInput)
+        stopVoiceTyping()
         if (lifecycleRegistry.currentState.isAtLeast(Lifecycle.State.RESUMED)) {
             lifecycleRegistry.handleLifecycleEvent(Lifecycle.Event.ON_PAUSE)
             lifecycleRegistry.handleLifecycleEvent(Lifecycle.Event.ON_STOP)
@@ -240,15 +249,73 @@ class HindiKeyboardIME : InputMethodService(), LifecycleOwner, ViewModelStoreOwn
         keyboardState = keyboardState.copy(currentWord = query, suggestions = suggestions)
     }
 
-    private fun launchVoiceTyping() {
+    private fun toggleVoiceTyping() {
+        if (keyboardState.isListeningVoice) {
+            stopVoiceTyping()
+            return
+        }
+
+        if (!SpeechRecognizer.isRecognitionAvailable(this)) {
+            Toast.makeText(this, "Voice recognition service unavailable", Toast.LENGTH_SHORT).show()
+            return
+        }
+
         try {
+            speechRecognizer?.destroy()
+            speechRecognizer = SpeechRecognizer.createSpeechRecognizer(this).apply {
+                setRecognitionListener(object : RecognitionListener {
+                    override fun onReadyForSpeech(params: Bundle?) {
+                        mainHandler.post { keyboardState = keyboardState.copy(isListeningVoice = true) }
+                    }
+                    override fun onBeginningOfSpeech() {}
+                    override fun onRmsChanged(rmsdB: Float) {}
+                    override fun onBufferReceived(buffer: ByteArray?) {}
+                    override fun onEndOfSpeech() {
+                        mainHandler.post { keyboardState = keyboardState.copy(isListeningVoice = false) }
+                    }
+                    override fun onError(error: Int) {
+                        mainHandler.post { keyboardState = keyboardState.copy(isListeningVoice = false) }
+                    }
+                    override fun onResults(results: Bundle?) {
+                        mainHandler.post {
+                            keyboardState = keyboardState.copy(isListeningVoice = false)
+                            val matches = results?.getStringArrayList(SpeechRecognizer.RESULTS_RECOGNITION)
+                            if (!matches.isNullOrEmpty()) {
+                                val spoken = matches[0]
+                                val ic = currentInputConnection
+                                ic?.commitText(spoken + " ", 1)
+                                SoundHapticHelper.performHapticFeedback(this@HindiKeyboardIME, isEnabled = true)
+                            }
+                        }
+                    }
+                    override fun onPartialResults(partialResults: Bundle?) {}
+                    override fun onEvent(eventType: Int, params: Bundle?) {}
+                })
+            }
+
+            val lang = if (keyboardState.typingMode == TypingMode.HINDI_TRANSLITERATION) "hi-IN" else "en-US"
             val intent = Intent(RecognizerIntent.ACTION_RECOGNIZE_SPEECH).apply {
                 putExtra(RecognizerIntent.EXTRA_LANGUAGE_MODEL, RecognizerIntent.LANGUAGE_MODEL_FREE_FORM)
-                putExtra(RecognizerIntent.EXTRA_LANGUAGE, if (keyboardState.typingMode == TypingMode.HINDI_TRANSLITERATION) "hi-IN" else "en-US")
-                flags = Intent.FLAG_ACTIVITY_NEW_TASK
+                putExtra(RecognizerIntent.EXTRA_LANGUAGE, lang)
+                putExtra(RecognizerIntent.EXTRA_CALLING_PACKAGE, packageName)
             }
-            startActivity(intent)
+
+            speechRecognizer?.startListening(intent)
+            keyboardState = keyboardState.copy(isListeningVoice = true)
+            SoundHapticHelper.performHapticFeedback(this, isEnabled = true)
+        } catch (e: Exception) {
+            keyboardState = keyboardState.copy(isListeningVoice = false)
+            Toast.makeText(this, "Microphone error: ${e.message}", Toast.LENGTH_SHORT).show()
+        }
+    }
+
+    private fun stopVoiceTyping() {
+        try {
+            speechRecognizer?.stopListening()
+            speechRecognizer?.destroy()
+            speechRecognizer = null
         } catch (ignored: Exception) {}
+        keyboardState = keyboardState.copy(isListeningVoice = false)
     }
 
     private fun launchSettings() {
@@ -259,6 +326,7 @@ class HindiKeyboardIME : InputMethodService(), LifecycleOwner, ViewModelStoreOwn
     }
 
     override fun onDestroy() {
+        stopVoiceTyping()
         if (lifecycleRegistry.currentState.isAtLeast(Lifecycle.State.INITIALIZED)) {
             lifecycleRegistry.handleLifecycleEvent(Lifecycle.Event.ON_DESTROY)
         }

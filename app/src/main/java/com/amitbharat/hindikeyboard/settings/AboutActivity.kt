@@ -24,9 +24,9 @@ class AboutActivity : AppCompatActivity() {
     private lateinit var binding: ActivityAboutBinding
 
     private val appAboutText = """
-        Indic Keyboard - Modern Hindi & English Keyboard
+        Hinglish Keyboard - Modern Hindi & English Keyboard
         
-        A fast, privacy-first bilingual Android keyboard with instant 1-tap English ↔ हिन्दी transliteration, smart auto-correction, emoji prediction, and clipboard history.
+        A fast, privacy-first bilingual Android keyboard with instant 1-tap English ↔ हिन्दी transliteration, smart auto-correction, voice typing, emoji prediction, and clipboard history.
         
         • Developed by: Amit Bharat
         • Company: Rooys Soft Tech

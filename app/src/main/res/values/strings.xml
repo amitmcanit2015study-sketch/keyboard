@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <string name="app_name">Indic Keyboard</string>
+    <string name="app_name">Hinglish Keyboard</string>
     <string name="app_header_subtitle">by Amit Bharat</string>
     <string name="developer_name">Amit Bharat</string>
     <string name="developed_by">Developed by Amit Bharat</string>
@@ -15,19 +15,19 @@
     <string name="download_apk">Download APK</string>
     <string name="send_feedback">Send Feedback</string>
     <string name="about_footer">100% Offline • No Ads • Zero Tracking</string>
-    <string name="about_description">Indic Keyboard is a fast, privacy-first bilingual Android keyboard designed for effortless English and Hindi typing. Featuring instant one-tap phonetic transliteration, smart auto-correction, emoji prediction, clipboard history, and beautiful customizable themes.</string>
+    <string name="about_description">Hinglish Keyboard is a fast, privacy-first bilingual Android keyboard designed for effortless English and Hindi typing. Featuring instant one-tap phonetic transliteration, smart auto-correction, voice typing, emoji prediction, clipboard history, and beautiful customizable themes.</string>
 
     <string name="subtype_en_us">English (US)</string>
     <string name="subtype_hi_in">Hindi (Transliteration)</string>
 
     <!-- Setup Wizard -->
-    <string name="setup_title">Enable Indic Keyboard</string>
+    <string name="setup_title">Enable Hinglish Keyboard</string>
     <string name="setup_subtitle">Fast, secure bilingual typing with 1-tap English ↔ हिन्दी transliteration</string>
     <string name="step_1_title">Step 1: Enable in Settings</string>
-    <string name="step_1_desc">Turn on Indic Keyboard in system input settings</string>
+    <string name="step_1_desc">Turn on Hinglish Keyboard in system input settings</string>
     <string name="btn_enable_ime">Enable in Settings</string>
     <string name="step_2_title">Step 2: Select Input Method</string>
-    <string name="step_2_desc">Choose Indic Keyboard as your active keyboard</string>
+    <string name="step_2_desc">Choose Hinglish Keyboard as your active keyboard</string>
     <string name="btn_select_ime">Switch Keyboard</string>
     <string name="step_3_title">Step 3: Test Typing</string>
     <string name="test_typing_hint">Type here: namaste, mera naam amit hai, gm…</string>
