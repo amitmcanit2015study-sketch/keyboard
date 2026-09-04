@@ -311,7 +311,7 @@ fun QwertyLayout(
                 Icon(
                     if (state.shiftState == ShiftState.CAPS_LOCK) Icons.Default.KeyboardCapslock else Icons.Default.ArrowUpward,
                     contentDescription = "Shift",
-                    tint = if (state.shiftState != ShiftState.OFF) colors.accentColor else colors.specialKeyTextColor,
+                    tint = if (state.shiftState != ShiftState.OFF) Color.White else colors.specialKeyTextColor,
                     modifier = Modifier.size(26.dp)
                 )
             }
@@ -482,9 +482,9 @@ fun MoreSymbolsLayout(
     onLayoutChange: (KeyboardLayoutType) -> Unit,
     imeAction: Int
 ) {
-    val r1 = listOf("~", "`", "|", "•", "√", "π", "÷", "×", "¶", "∆")
-    val r2 = listOf("£", "¥", "$", "¢", "^", "°", "=", "{", "}", "\\")
-    val r3 = listOf("%", "©", "®", "™", "✓", "[", "]")
+    val r1 = listOf("~", "`", "|", "â¢", "â", "Ï", "Ã·", "Ã", "Â¶", "â")
+    val r2 = listOf("Â£", "Â¥", "$", "Â¢", "^", "Â°", "=", "{", "}", "\\")
+    val r3 = listOf("%", "Â©", "Â®", "â¢", "â", "[", "]")
 
     Column(modifier = Modifier.fillMaxWidth().padding(horizontal = 2.dp, vertical = 2.dp)) {
         Row(modifier = Modifier.fillMaxWidth().height(60.dp)) {

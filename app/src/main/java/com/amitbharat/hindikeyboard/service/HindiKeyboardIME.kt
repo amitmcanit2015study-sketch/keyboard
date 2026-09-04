@@ -144,12 +144,18 @@ class HindiKeyboardIME : InputMethodService(), LifecycleOwner, ViewModelStoreOwn
 
         val ic = currentInputConnection ?: return
 
-        if (text.length == 1 && text.first().isLetter()) {
-            composingWord.append(text)
-            updateSuggestions()
-            ic.commitText(text, 1)
+        val textToCommit = if (keyboardState.shiftState != ShiftState.OFF && text.length == 1 && text.first().isLetter()) {
+            text.uppercase()
         } else {
-            ic.commitText(text, 1)
+            text
+        }
+
+        if (textToCommit.length == 1 && textToCommit.first().isLetter()) {
+            composingWord.append(textToCommit)
+            updateSuggestions()
+            ic.commitText(textToCommit, 1)
+        } else {
+            ic.commitText(textToCommit, 1)
             composingWord.clear()
             updateSuggestions()
         }
@@ -266,7 +272,9 @@ class HindiKeyboardIME : InputMethodService(), LifecycleOwner, ViewModelStoreOwn
 
     private fun updateSuggestions() {
         val query = composingWord.toString()
-        val suggestions = SuggestionEngine.getSuggestions(query, keyboardState.typingMode)
+        val ic = currentInputConnection
+        val contextText = ic?.getTextBeforeCursor(50, 0)?.toString() ?: ""
+        val suggestions = SuggestionEngine.getSuggestions(query, keyboardState.typingMode, contextText)
         keyboardState = keyboardState.copy(currentWord = query, suggestions = suggestions)
     }
 

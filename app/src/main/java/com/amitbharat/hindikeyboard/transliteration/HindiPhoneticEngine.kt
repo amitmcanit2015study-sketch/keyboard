@@ -11,6 +11,8 @@ object HindiPhoneticEngine {
 
     // Common High-Frequency Hinglish Words Dictionary for Instant 100% Accurate Transliteration
     private val commonWords = mapOf(
+        "katiyar" to listOf("कटियार", "कतियर", "कटियर"),
+        "katyar" to listOf("कटियार", "कतियर"),
         "hindi" to listOf("हिंदी", "हिन्दी", "हिन्दी।"),
         "and" to listOf("और", "तथा", "एंड"),
         "end" to listOf("एंड", "अंत", "खत्म"),
@@ -28,10 +30,10 @@ object HindiPhoneticEngine {
         "naam" to listOf("नाम", "नम", "नामा"),
         "amit" to listOf("अमित", "अमीत", "अमिताभ"),
         "hai" to listOf("है", "हैं", "हो"),
-        "hain" to listOf("हैं", "है", "हाँ"),
-        "ho" to listOf("हो", "हों", "हू"),
-        "hoon" to listOf("हूँ", "हूं", "हो"),
-        "hun" to listOf("हूँ", "हूं", "हो"),
+        "hain" to listOf("हैं", "है", "हां"),
+        "ho" to listOf("हो", "हों", "हूं"),
+        "hoon" to listOf("हूं", "हूं", "हो"),
+        "hun" to listOf("हूं", "हूं", "हो"),
         "kaise" to listOf("कैसे", "कैसा", "कैसी"),
         "kaisa" to listOf("कैसा", "कैसे", "कैसी"),
         "kaisi" to listOf("कैसी", "कैसे", "कैसा"),
@@ -58,8 +60,8 @@ object HindiPhoneticEngine {
         "kyun" to listOf("क्यों", "क्यों?", "क्युं"),
         "kyu" to listOf("क्यों", "क्यों?", "क्युं"),
         "kab" to listOf("कब", "कभी", "कब?"),
-        "kahan" to listOf("कहाँ", "कहा", "कहां"),
-        "kaha" to listOf("कहा", "कहाँ", "कहां"),
+        "kahan" to listOf("कहां", "कहा", "कहां"),
+        "kaha" to listOf("कहा", "कहां", "कहां"),
         "kaun" to listOf("कौन", "कौन?", "कोन"),
         "kon" to listOf("कौन", "कौन?", "कोन"),
         "kuch" to listOf("कुछ", "कुछ भी", "थोड़ा"),
@@ -79,9 +81,6 @@ object HindiPhoneticEngine {
         "dhanyawad" to listOf("धन्यवाद", "धन्यवाद।", "शुक्रिया"),
         "dhanyavad" to listOf("धन्यवाद", "धन्यवाद।", "शुक्रिया"),
         "shukriya" to listOf("शुक्रिया", "धन्यवाद", "शुक्रिया।"),
-        "shubh" to listOf("शुभ", "शुभ प्रभात", "शुभ रात्रि"),
-        "prabhat" to listOf("प्रभात", "शुभ प्रभात", "सवेरा"),
-        "ratri" to listOf("रात्रि", "शुभ रात्रि", "रात"),
         "dost" to listOf("दोस्त", "मित्र", "दोस्ती"),
         "yaar" to listOf("यार", "मित्र", "दोस्त"),
         "bhai" to listOf("भाई", "भैया", "भाईजान"),
@@ -100,8 +99,6 @@ object HindiPhoneticEngine {
         "pehle" to listOf("पहले", "पूर्व", "शुरुआत"),
         "hamesha" to listOf("हमेशा", "सदा", "हरदम"),
         "kabhi" to listOf("कभी", "कभी-कभी", "कभी नहीं"),
-        "kripya" to listOf("कृपया", "कृपा", "विनती"),
-        "kripaya" to listOf("कृपया", "कृपा", "विनती"),
         "zaruri" to listOf("ज़रूरी", "जरूरी", "आवश्यक"),
         "jaruri" to listOf("जरूरी", "ज़रूरी", "आवश्यक"),
         "bahut" to listOf("बहुत", "बड़ा", "अत्यधिक"),
@@ -130,65 +127,24 @@ object HindiPhoneticEngine {
         "ki" to listOf("की", "कि", "के"),
         "ke" to listOf("के", "का", "की"),
         "pe" to listOf("पे", "पर", "ऊपर"),
-        "jana" to listOf("जाना", "जाओ", "गया"),
-        "aana" to listOf("आना", "आओ", "आया"),
-        "karna" to listOf("करना", "करो", "किया"),
-        "dekhna" to listOf("देखना", "देखो", "देखा"),
-        "sunna" to listOf("सुनना", "सुनो", "सुना"),
-        "bolna" to listOf("बोलना", "बोलो", "कहो"),
-        "likhna" to listOf("लिखना", "लिखो", "लिखा"),
-        "padhna" to listOf("पढ़ना", "पढ़ो", "पढ़ा"),
-        "dekh" to listOf("देख", "देखो", "देखा"),
-        "dekho" to listOf("देखो", "देख", "देखिए"),
-        "sun" to listOf("सुन", "सुनो", "सुना"),
-        "suno" to listOf("सुनो", "सुन", "सुनिए"),
-        "jao" to listOf("जाओ", "जाइए", "जा"),
-        "aao" to listOf("आओ", "आइए", "आ"),
-        "karo" to listOf("करो", "करें", "करिए"),
-        "karein" to listOf("करें", "करो", "करिए"),
-        "raho" to listOf("रहो", "रहिए", "रह"),
         "raha" to listOf("रहा", "रही", "रहे"),
         "rahi" to listOf("रही", "रहा", "रहे"),
         "rahe" to listOf("रहे", "रहा", "रही"),
         "tha" to listOf("था", "थी", "थे"),
         "thi" to listOf("थी", "था", "थे"),
         "the" to listOf("थे", "था", "थी"),
-        "hoga" to listOf("होगा", "होगी", "होंगे"),
-        "hogi" to listOf("होगी", "होगा", "होंगे"),
-        "honge" to listOf("होंगे", "होगा", "होगी"),
         "chahiye" to listOf("चाहिए", "चाहती", "चाहता"),
         "sakta" to listOf("सकता", "सकती", "सकते"),
         "sakti" to listOf("सकती", "सकता", "सकते"),
         "sakte" to listOf("सकते", "सकता", "सकती"),
-        "chalo" to listOf("चलो", "चलिए", "चल"),
-        "chalte" to listOf("चलते", "चलें", "चलो"),
-        "milte" to listOf("मिलते", "मिलेंगे", "मिलना"),
-        "milenge" to listOf("मिलेंगे", "मिलते", "मिलें"),
-        "duniya" to listOf("दुनिया", "संसार", "विश्व"),
-        "log" to listOf("लोग", "जनता", "व्यक्तियों"),
-        "paas" to listOf("पास", "नजदीक", "समीप"),
-        "door" to listOf("दूर", "दूरी", "दूर?"),
-        "dur" to listOf("दूर", "दूरी", "दूर?"),
-        "subah" to listOf("सुबह", "सवेरा", "प्रातः"),
-        "sham" to listOf("शाम", "संध्या", "सांझ"),
-        "shaam" to listOf("शाम", "संध्या", "सांझ"),
-        "raat" to listOf("रात", "रात्रि", "निशा"),
         "phone" to listOf("फोन", "मोबाइल", "फ़ोन"),
         "mobile" to listOf("मोबाइल", "फोन", "सेलफोन"),
         "message" to listOf("मैसेज", "संदेश", "मैसेज करो"),
         "chat" to listOf("चैट", "बातचीत", "चैटिंग"),
         "call" to listOf("कॉल", "फोन", "कॉल करो"),
-        "photo" to listOf("फोटो", "तस्वीर", "चित्र"),
-        "video" to listOf("वीडियो", "विडियो", "वीडियो क्लिप"),
-        "gaana" to listOf("गाना", "गीत", "संगीत"),
-        "gana" to listOf("गाना", "गीत", "संगीत"),
-        "app" to listOf("ऐप", "एप्लिकेशन", "सॉफ्टवेयर"),
-        "time" to listOf("टाइम", "समय", "वक्त"),
-        "soch" to listOf("सोच", "विचार", "सोचो"),
-        "samajh" to listOf("समझ", "समझो", "समझदारी"),
-        "ha" to listOf("हाँ", "हां", "हाँजी"),
-        "haan" to listOf("हाँ", "हां", "हाँजी"),
-        "han" to listOf("हाँ", "हां", "हाँजी"),
+        "ha" to listOf("हां", "हांजी"),
+        "haan" to listOf("हां", "हांजी"),
+        "han" to listOf("हां", "हांजी"),
         "nahi" to listOf("नहीं", "ना", "नही"),
         "nahin" to listOf("नहीं", "ना", "नही"),
         "na" to listOf("ना", "नहीं", "नाहीं"),
@@ -196,7 +152,7 @@ object HindiPhoneticEngine {
         "hello" to listOf("हेलो", "नमस्ते", "नमस्कार"),
         "hi" to listOf("हाय", "नमस्ते", "हेलो"),
         "ok" to listOf("ओके", "ठीक है", "सही है"),
-        "yes" to listOf("हाँ", "हां", "यस"),
+        "yes" to listOf("हां", "यस"),
         "no" to listOf("नहीं", "ना", "नो")
     )
 
@@ -290,7 +246,7 @@ object HindiPhoneticEngine {
         var isStart = true
 
         while (i < s.length) {
-            // Check 3-char, 2-char, then 1-char consonants
+            // Check 4-char down to 1-char consonants
             var matchedConsonant: String? = null
             var matchedConsonantKey = ""
 
@@ -322,25 +278,20 @@ object HindiPhoneticEngine {
                 }
 
                 if (matchedMatraKey.isNotEmpty()) {
-                    // Consonant + Matra
                     val baseConsonant = matchedConsonant.removeSuffix("्")
                     val matraSign = matras[matchedMatraKey] ?: ""
-                    // In Hindi, ending 'i' usually takes 'ी' (badi ee matra)
                     val finalMatra = if (matchedMatraKey == "i" && i + 1 >= s.length) "ी" else matraSign
                     sb.append(baseConsonant).append(finalMatra)
                     i += matchedMatraKey.length
                 } else {
-                    // In Hindi, consonant at end of word or before another consonant:
                     val baseConsonant = matchedConsonant.removeSuffix("्")
                     if (i >= s.length) {
                         sb.append(baseConsonant)
                     } else {
-                        // Consonant cluster / conjunct
                         sb.append(matchedConsonant)
                     }
                 }
             } else {
-                // Initial or standalone vowel
                 var matchedVowelKey = ""
                 for (vLen in 3 downTo 1) {
                     if (i + vLen <= s.length) {
@@ -361,7 +312,6 @@ object HindiPhoneticEngine {
                     i += matchedVowelKey.length
                     isStart = false
                 } else {
-                    // Unknown character (symbols, numbers, etc.)
                     sb.append(s[i])
                     i++
                     isStart = false
@@ -390,12 +340,32 @@ object HindiPhoneticEngine {
             list.add(primary.dropLast(1) + "ी")
         }
 
-        // 3. Nuqta variations (ज़ vs ज, फ़ vs फ)
-        if (primary.contains("ज़")) {
-            list.add(primary.replace("ज़", "ज"))
+        // 3. Nuqta variations
+        if (primary.contains("ज़")) {
+            list.add(primary.replace("ज़", "ज"))
         }
-        if (primary.contains("फ़")) {
-            list.add(primary.replace("फ़", "फ"))
+        if (primary.contains("फ़")) {
+            list.add(primary.replace("फ़", "फ"))
+        }
+
+        // 4. Soft 'त' vs Hard 'ट' variation for 't' (e.g. katiyar -> कटियार & कतियर)
+        if (primary.contains("त")) {
+            list.add(primary.replace("त", "ट"))
+        }
+        if (primary.contains("ट")) {
+            list.add(primary.replace("ट", "त"))
+        }
+        if (primary.contains("थ")) {
+            list.add(primary.replace("थ", "ठ"))
+        }
+        if (primary.contains("ठ")) {
+            list.add(primary.replace("ठ", "थ"))
+        }
+        if (primary.contains("द")) {
+            list.add(primary.replace("द", "ड"))
+        }
+        if (primary.contains("ड")) {
+            list.add(primary.replace("ड", "द"))
         }
 
         return list.filter { it != primary }
