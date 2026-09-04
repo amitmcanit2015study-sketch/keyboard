@@ -7,7 +7,8 @@ enum class KeyboardLayoutType {
     QWERTY,
     SYMBOLS,
     MORE_SYMBOLS,
-    EMOJI
+    EMOJI,
+    NUMERIC
 }
 
 enum class ShiftState {

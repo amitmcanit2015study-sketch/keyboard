@@ -114,6 +114,18 @@ class HindiKeyboardIME : InputMethodService(), LifecycleOwner, ViewModelStoreOwn
         }
         composingWord.clear()
         updateSuggestions()
+
+        // Auto switch to numeric keyboard when focusing a number or amount input field
+        val inputType = info?.inputType ?: 0
+        val classType = inputType and EditorInfo.TYPE_MASK_CLASS
+        val isNumberField = classType == EditorInfo.TYPE_CLASS_NUMBER ||
+                            classType == EditorInfo.TYPE_CLASS_PHONE ||
+                            classType == EditorInfo.TYPE_CLASS_DATETIME ||
+                            (inputType and EditorInfo.TYPE_NUMBER_FLAG_DECIMAL) != 0 ||
+                            (inputType and EditorInfo.TYPE_NUMBER_FLAG_SIGNED) != 0
+
+        val targetLayout = if (isNumberField) KeyboardLayoutType.NUMERIC else KeyboardLayoutType.QWERTY
+        keyboardState = keyboardState.copy(layoutType = targetLayout)
     }
 
     override fun onFinishInputView(finishingInput: Boolean) {
@@ -326,8 +338,12 @@ class HindiKeyboardIME : InputMethodService(), LifecycleOwner, ViewModelStoreOwn
                             val text = matches[0]
                             mainHandler.post {
                                 val ic = currentInputConnection
-                                ic?.finishComposingText()
-                                ic?.commitText(text + " ", 1)
+                                if (ic != null) {
+                                    // Clear active composing region before committing to prevent duplicate text
+                                    ic.setComposingText("", 0)
+                                    ic.finishComposingText()
+                                    ic.commitText(text + " ", 1)
+                                }
                                 keyboardState = keyboardState.copy(voicePartialText = "")
                                 SoundHapticHelper.performHapticFeedback(this@HindiKeyboardIME, isEnabled = true)
 
