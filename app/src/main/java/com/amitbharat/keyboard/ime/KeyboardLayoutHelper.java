@@ -162,7 +162,7 @@ public class KeyboardLayoutHelper {
         row2.add(new KeyboardKey('4', "4", null, 1.0f));
         row2.add(new KeyboardKey('5', "5", null, 1.0f));
         row2.add(new KeyboardKey('6', "6", null, 1.0f));
-        row2.add(new KeyboardKey('-', "-", null, 1.0f, true, false));
+        row2.add(new KeyboardKey('-', "-", null, 1.0f));
         rows.add(row2);
 
         // Row 3: 7 8 9 +
@@ -170,14 +170,14 @@ public class KeyboardLayoutHelper {
         row3.add(new KeyboardKey('7', "7", null, 1.0f));
         row3.add(new KeyboardKey('8', "8", null, 1.0f));
         row3.add(new KeyboardKey('9', "9", null, 1.0f));
-        row3.add(new KeyboardKey('+', "+", null, 1.0f, true, false));
+        row3.add(new KeyboardKey('+', "+", null, 1.0f));
         rows.add(row3);
 
         // Row 4: [ABC] 0 . [ENTER]
         List<KeyboardKey> row4 = new ArrayList<>();
         row4.add(new KeyboardKey(KeyboardKey.CODE_MODE_ALPHA, "ABC", 0, 1.0f, true, false));
         row4.add(new KeyboardKey('0', "0", null, 1.0f));
-        row4.add(new KeyboardKey('.', ".", null, 1.0f, true, false));
+        row4.add(new KeyboardKey('.', ".", null, 1.0f));
         row4.add(new KeyboardKey(KeyboardKey.CODE_ENTER, "", R.drawable.ic_enter, 1.0f, true, true));
         rows.add(row4);
 

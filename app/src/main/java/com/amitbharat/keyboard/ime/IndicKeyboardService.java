@@ -38,6 +38,9 @@ public class IndicKeyboardService extends InputMethodService implements
                     if (softKeyboardView != null) {
                         softKeyboardView.post(() -> softKeyboardView.resolveThemeColors());
                     }
+                    if (candidateStripView != null) {
+                        candidateStripView.post(() -> candidateStripView.updateTheme(preferences.getTheme()));
+                    }
                 }
             };
 
@@ -78,6 +81,7 @@ public class IndicKeyboardService extends InputMethodService implements
         keyboardContainer = rootView.findViewById(R.id.keyboardContainer);
 
         candidateStripView.setLanguage(currentLanguage);
+        candidateStripView.updateTheme(preferences.getTheme());
         candidateStripView.setOnCandidateClickListener(this);
 
         // 1. Top-left language toggle listener (HN / EN)
@@ -108,14 +112,34 @@ public class IndicKeyboardService extends InputMethodService implements
         if (candidateStripView != null) {
             candidateStripView.setSuggestions(Collections.emptyList());
             candidateStripView.setLanguage(currentLanguage);
+            candidateStripView.updateTheme(preferences.getTheme());
         }
 
         if (softKeyboardView != null) {
             softKeyboardView.resolveThemeColors();
-            softKeyboardView.setMode(KeyboardLayoutHelper.MODE_ALPHA);
+
+            boolean isNumericInput = false;
+            if (info != null) {
+                int inputClass = info.inputType & InputType.TYPE_MASK_CLASS;
+                if (inputClass == InputType.TYPE_CLASS_NUMBER
+                        || inputClass == InputType.TYPE_CLASS_PHONE
+                        || inputClass == InputType.TYPE_CLASS_DATETIME) {
+                    isNumericInput = true;
+                }
+                int variation = info.inputType & InputType.TYPE_MASK_VARIATION;
+                if (variation == InputType.TYPE_NUMBER_VARIATION_PASSWORD) {
+                    isNumericInput = true;
+                }
+            }
+
+            if (isNumericInput) {
+                softKeyboardView.setMode(KeyboardLayoutHelper.MODE_NUMPAD);
+            } else {
+                softKeyboardView.setMode(KeyboardLayoutHelper.MODE_ALPHA);
+            }
 
             // Check auto-capitalization if enabled
-            if (preferences.isAutoCapEnabled() && info != null) {
+            if (!isNumericInput && preferences.isAutoCapEnabled() && info != null) {
                 int caps = info.inputType & InputType.TYPE_MASK_FLAGS;
                 boolean shouldCap = (caps & InputType.TYPE_TEXT_FLAG_CAP_SENTENCES) != 0
                         || (caps & InputType.TYPE_TEXT_FLAG_CAP_WORDS) != 0
@@ -341,6 +365,9 @@ public class IndicKeyboardService extends InputMethodService implements
 
     private void showEmojiKeyboard() {
         if (softKeyboardView != null) softKeyboardView.setVisibility(View.GONE);
-        if (emojiKeyboardView != null) emojiKeyboardView.setVisibility(View.VISIBLE);
+        if (emojiKeyboardView != null) {
+            emojiKeyboardView.updateTheme();
+            emojiKeyboardView.setVisibility(View.VISIBLE);
+        }
     }
 }

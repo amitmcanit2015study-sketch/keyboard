@@ -24,6 +24,7 @@
         android:paddingEnd="8dp">
 
         <ImageView
+            android:id="@+id/ivGlobeIcon"
             android:layout_width="14dp"
             android:layout_height="14dp"
             android:layout_marginEnd="4dp"
@@ -40,6 +41,7 @@
             android:textStyle="bold" />
 
         <TextView
+            android:id="@+id/tvLangDivider"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_marginStart="2dp"

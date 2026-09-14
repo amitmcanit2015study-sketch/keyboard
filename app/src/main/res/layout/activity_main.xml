@@ -271,6 +271,25 @@
                             android:minLines="2" />
                     </com.google.android.material.textfield.TextInputLayout>
 
+                    <com.google.android.material.textfield.TextInputLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_marginTop="8dp"
+                        app:boxCornerRadiusBottomEnd="12dp"
+                        app:boxCornerRadiusBottomStart="12dp"
+                        app:boxCornerRadiusTopEnd="12dp"
+                        app:boxCornerRadiusTopStart="12dp"
+                        app:hintEnabled="false">
+
+                        <com.google.android.material.textfield.TextInputEditText
+                            android:id="@+id/etNumericTestInput"
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:hint="Type numbers (auto opens numeric keypad)..."
+                            android:inputType="number"
+                            android:minLines="1" />
+                    </com.google.android.material.textfield.TextInputLayout>
+
                 </LinearLayout>
             </com.google.android.material.card.MaterialCardView>
 

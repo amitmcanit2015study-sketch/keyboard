@@ -14,6 +14,7 @@ import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.GridLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 import com.amitbharat.keyboard.R;
+import com.amitbharat.keyboard.engine.KeyboardPreferences;
 import java.util.List;
 
 public class EmojiKeyboardView extends FrameLayout {
@@ -27,6 +28,7 @@ public class EmojiKeyboardView extends FrameLayout {
     private RecyclerView recyclerEmojis;
     private View btnBackToAlpha;
     private ImageButton btnBackspace;
+    private android.widget.LinearLayout bottomBarLayout;
     private OnEmojiSelectedListener listener;
 
     public EmojiKeyboardView(Context context) {
@@ -58,20 +60,22 @@ public class EmojiKeyboardView extends FrameLayout {
                 LayoutParams.MATCH_PARENT, 0, 1.0f
         );
         recyclerEmojis.setLayoutParams(recyclerLp);
-        recyclerEmojis.setLayoutManager(new GridLayoutManager(context, 7));
+        recyclerEmojis.setLayoutManager(new GridLayoutManager(context, 8));
+        recyclerEmojis.setClipToPadding(false);
+        recyclerEmojis.setPadding(dpToPx(4), dpToPx(4), dpToPx(4), dpToPx(4));
         recyclerEmojis.setAdapter(new EmojiAdapter(KeyboardLayoutHelper.EMOJIS));
         root.addView(recyclerEmojis);
 
         // Bottom Bar (ABC, Space, Backspace)
-        android.widget.LinearLayout bottomBar = new android.widget.LinearLayout(context);
-        bottomBar.setOrientation(android.widget.LinearLayout.HORIZONTAL);
-        bottomBar.setGravity(Gravity.CENTER_VERTICAL);
-        bottomBar.setPadding(dpToPx(6), dpToPx(4), dpToPx(6), dpToPx(4));
-        bottomBar.setBackgroundColor(ContextCompatColor(context, R.color.candidate_bar_bg));
+        bottomBarLayout = new android.widget.LinearLayout(context);
+        bottomBarLayout.setOrientation(android.widget.LinearLayout.HORIZONTAL);
+        bottomBarLayout.setGravity(Gravity.CENTER_VERTICAL);
+        bottomBarLayout.setPadding(dpToPx(8), dpToPx(4), dpToPx(8), dpToPx(4));
+        bottomBarLayout.setBackgroundColor(ContextCompatColor(context, R.color.candidate_bar_bg));
         android.widget.LinearLayout.LayoutParams bottomBarLp = new android.widget.LinearLayout.LayoutParams(
-                LayoutParams.MATCH_PARENT, dpToPx(44)
+                LayoutParams.MATCH_PARENT, dpToPx(46)
         );
-        bottomBar.setLayoutParams(bottomBarLp);
+        bottomBarLayout.setLayoutParams(bottomBarLp);
 
         TextView tvAbc = new TextView(context);
         tvAbc.setText("ABC");
@@ -81,36 +85,67 @@ public class EmojiKeyboardView extends FrameLayout {
         tvAbc.setBackgroundResource(R.drawable.bg_key_action);
         tvAbc.setGravity(Gravity.CENTER);
         android.widget.LinearLayout.LayoutParams abcLp = new android.widget.LinearLayout.LayoutParams(
-                dpToPx(70), dpToPx(36)
+                dpToPx(76), dpToPx(38)
         );
         tvAbc.setLayoutParams(abcLp);
         tvAbc.setOnClickListener(v -> {
             if (listener != null) listener.onBackToAlpha();
         });
-        bottomBar.addView(tvAbc);
+        bottomBarLayout.addView(tvAbc);
 
         View spacer = new View(context);
         android.widget.LinearLayout.LayoutParams spacerLp = new android.widget.LinearLayout.LayoutParams(
                 0, 1, 1.0f
         );
         spacer.setLayoutParams(spacerLp);
-        bottomBar.addView(spacer);
+        bottomBarLayout.addView(spacer);
 
         ImageButton ibBackspace = new ImageButton(context);
         ibBackspace.setImageResource(R.drawable.ic_backspace);
         ibBackspace.setBackgroundResource(R.drawable.bg_key_action);
         ibBackspace.setColorFilter(ContextCompatColor(context, R.color.key_text_action));
         android.widget.LinearLayout.LayoutParams bsLp = new android.widget.LinearLayout.LayoutParams(
-                dpToPx(70), dpToPx(36)
+                dpToPx(76), dpToPx(38)
         );
         ibBackspace.setLayoutParams(bsLp);
         ibBackspace.setOnClickListener(v -> {
             if (listener != null) listener.onBackspace();
         });
-        bottomBar.addView(ibBackspace);
+        bottomBarLayout.addView(ibBackspace);
 
-        root.addView(bottomBar);
+        root.addView(bottomBarLayout);
         addView(root);
+        updateTheme();
+    }
+
+    public void updateTheme() {
+        KeyboardPreferences prefs = new KeyboardPreferences(getContext());
+        String theme = prefs.getTheme();
+        int bgColor = ContextCompatColor(getContext(), R.color.keyboard_bg);
+        int barBgColor = ContextCompatColor(getContext(), R.color.candidate_bar_bg);
+        if (KeyboardPreferences.THEME_LIGHT.equals(theme)) {
+            bgColor = 0xFFECEFF1;
+            barBgColor = 0xFFF1F3F4;
+        } else if (KeyboardPreferences.THEME_DARK.equals(theme)) {
+            bgColor = 0xFF1E222B;
+            barBgColor = 0xFF262A35;
+        } else if (KeyboardPreferences.THEME_BLUE.equals(theme)) {
+            bgColor = 0xFFDCE8F8;
+            barBgColor = 0xFFE6EFFB;
+        } else if (KeyboardPreferences.THEME_PURPLE.equals(theme)) {
+            bgColor = 0xFFEFE7F6;
+            barBgColor = 0xFFF5EEFA;
+        } else if (KeyboardPreferences.THEME_GREEN.equals(theme)) {
+            bgColor = 0xFFE1EFE3;
+            barBgColor = 0xFFE9F5EB;
+        } else if (KeyboardPreferences.THEME_AMOLED.equals(theme)) {
+            bgColor = 0xFF000000;
+            barBgColor = 0xFF121212;
+        }
+        setBackgroundColor(bgColor);
+        if (bottomBarLayout != null) {
+            bottomBarLayout.setBackgroundColor(barBgColor);
+        }
     }
 
     public void setOnEmojiSelectedListener(OnEmojiSelectedListener listener) {
@@ -128,11 +163,14 @@ public class EmojiKeyboardView extends FrameLayout {
         @Override
         public EmojiViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
             TextView tv = new TextView(parent.getContext());
-            tv.setTextSize(TypedValue.COMPLEX_UNIT_SP, 24f);
+            tv.setTextSize(TypedValue.COMPLEX_UNIT_SP, 26f);
             tv.setGravity(Gravity.CENTER);
-            int size = dpToPx(44);
-            tv.setLayoutParams(new ViewGroup.LayoutParams(size, size));
-            tv.setBackgroundResource(R.drawable.bg_suggestion_chip);
+            tv.setIncludeFontPadding(false);
+            tv.setPadding(0, 0, 0, 0);
+            tv.setLayoutParams(new ViewGroup.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, dpToPx(48)));
+            TypedValue outValue = new TypedValue();
+            parent.getContext().getTheme().resolveAttribute(android.R.attr.selectableItemBackgroundBorderless, outValue, true);
+            tv.setBackgroundResource(outValue.resourceId);
             return new EmojiViewHolder(tv);
         }
 

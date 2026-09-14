@@ -283,10 +283,10 @@ public class SoftKeyboardView extends View {
     @Override
     protected void onDraw(Canvas canvas) {
         super.onDraw(canvas);
-        float cornerRadius = dpToPx(8);
+        float cornerRadius = dpToPx(10);
 
-        paintKeyText.setTextSize(dpToPx(20));
-        paintKeyHint.setTextSize(dpToPx(10));
+        paintKeyText.setTextSize(dpToPx(22));
+        paintKeyHint.setTextSize(dpToPx(11));
 
         for (List<KeyboardKey> row : keyRows) {
             for (KeyboardKey key : row) {
@@ -327,11 +327,11 @@ public class SoftKeyboardView extends View {
                     int textColor = key.isAccent ? 0xFFFFFFFF : colorKeyText;
                     paintKeyText.setColor(textColor);
                     if (key.code == KeyboardKey.CODE_SPACE) {
-                        paintKeyText.setTextSize(dpToPx(13));
-                    } else if (key.label != null && key.label.length() > 1) {
                         paintKeyText.setTextSize(dpToPx(14));
+                    } else if (key.label != null && key.label.length() > 1) {
+                        paintKeyText.setTextSize(dpToPx(15));
                     } else {
-                        paintKeyText.setTextSize(dpToPx(20));
+                        paintKeyText.setTextSize(dpToPx(22));
                     }
 
                     Paint.FontMetrics fm = paintKeyText.getFontMetrics();
@@ -369,6 +369,13 @@ public class SoftKeyboardView extends View {
                 return true;
 
             case MotionEvent.ACTION_MOVE:
+                if (activeKey != null) {
+                    float slop = dpToPx(10);
+                    if (x >= activeKey.bounds.left - slop && x <= activeKey.bounds.right + slop &&
+                        y >= activeKey.bounds.top - slop && y <= activeKey.bounds.bottom + slop) {
+                        return true;
+                    }
+                }
                 KeyboardKey currentKey = findKey(x, y);
                 if (currentKey != activeKey) {
                     if (activeKey != null) {
@@ -454,21 +461,20 @@ public class SoftKeyboardView extends View {
     }
 
     private void handleFeedback() {
+        if (preferences.isSoundEnabled() && audioManager != null) {
+            audioManager.playSoundEffect(AudioManager.FX_KEYPRESS_STANDARD, 0.6f);
+        }
         if (preferences.isVibrateEnabled()) {
             performHapticFeedback(HapticFeedbackConstants.KEYBOARD_TAP);
-        }
-        if (preferences.isSoundEnabled() && audioManager != null) {
-            audioManager.playSoundEffect(AudioManager.FX_KEYPRESS_STANDARD, 1.0f);
         }
     }
 
     private void showPopupPreview(KeyboardKey key) {
-        if (!preferences.isPopupEnabled() || key.code < 32 || key.label == null || key.label.length() > 1) {
-            dismissPopupPreview();
-            return;
-        }
+        if (!preferences.isPopupEnabled()) return;
+        if (key.code <= 0 && key.label != null && key.label.length() > 1) return; // don't show preview for special action keys
 
         popupTextView.setText(key.label);
+
         int[] location = new int[2];
         getLocationInWindow(location);
 
@@ -517,7 +523,22 @@ public class SoftKeyboardView extends View {
                 }
             }
         }
-        return null;
+        // If finger touched within the gap between keys, snap to closest key within 14dp
+        float closestDist = Float.MAX_VALUE;
+        KeyboardKey closestKey = null;
+        float maxTolerance = dpToPx(14);
+        for (List<KeyboardKey> row : keyRows) {
+            for (KeyboardKey key : row) {
+                float dx = Math.max(0, Math.max(key.bounds.left - x, x - key.bounds.right));
+                float dy = Math.max(0, Math.max(key.bounds.top - y, y - key.bounds.bottom));
+                float dist = (float) Math.hypot(dx, dy);
+                if (dist < closestDist && dist <= maxTolerance) {
+                    closestDist = dist;
+                    closestKey = key;
+                }
+            }
+        }
+        return closestKey;
     }
 
     private int dpToPx(float dp) {

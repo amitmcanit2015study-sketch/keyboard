@@ -89,6 +89,44 @@ public class CandidateStripView extends FrameLayout {
         this.settingsClickListener = listener;
     }
 
+    private int currentAccentColor = 0xFF0D6EFD;
+
+    public void updateTheme(String theme) {
+        Context ctx = getContext();
+        if (KeyboardPreferences.THEME_LIGHT.equals(theme)) {
+            currentAccentColor = 0xFF0D6EFD;
+        } else if (KeyboardPreferences.THEME_DARK.equals(theme)) {
+            currentAccentColor = 0xFF3B82F6;
+        } else if (KeyboardPreferences.THEME_BLUE.equals(theme)) {
+            currentAccentColor = 0xFF1976D2;
+        } else if (KeyboardPreferences.THEME_PURPLE.equals(theme)) {
+            currentAccentColor = 0xFF7C3AED;
+        } else if (KeyboardPreferences.THEME_GREEN.equals(theme)) {
+            currentAccentColor = 0xFF059669;
+        } else if (KeyboardPreferences.THEME_AMOLED.equals(theme)) {
+            currentAccentColor = 0xFF2563EB;
+        } else {
+            currentAccentColor = ContextCompat.getColor(ctx, R.color.md_theme_primary);
+        }
+
+        android.graphics.drawable.GradientDrawable pillBg = new android.graphics.drawable.GradientDrawable();
+        pillBg.setShape(android.graphics.drawable.GradientDrawable.RECTANGLE);
+        pillBg.setCornerRadius(TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP, 16, ctx.getResources().getDisplayMetrics()));
+        pillBg.setColor(currentAccentColor);
+        btnLanguageToggle.setBackground(pillBg);
+
+        tvActiveLang.setTextColor(0xFFFFFFFF);
+        tvAltLang.setTextColor(0xCCFFFFFF);
+        android.widget.ImageView ivGlobe = findViewById(R.id.ivGlobeIcon);
+        if (ivGlobe != null) {
+            ivGlobe.setColorFilter(0xFFFFFFFF);
+        }
+        TextView tvDivider = findViewById(R.id.tvLangDivider);
+        if (tvDivider != null) {
+            tvDivider.setTextColor(0xAAFFFFFF);
+        }
+    }
+
     public void setSuggestions(List<String> suggestions) {
         layoutSuggestionsContainer.removeAllViews();
         if (suggestions == null || suggestions.isEmpty()) {
@@ -109,7 +147,7 @@ public class CandidateStripView extends FrameLayout {
 
             // Highlight the primary/first suggestion
             if (i == 0) {
-                chip.setTextColor(ContextCompat.getColor(ctx, R.color.suggestion_chip_active_text));
+                chip.setTextColor(currentAccentColor);
                 chip.setTextSize(TypedValue.COMPLEX_UNIT_SP, 16f);
                 chip.setTypeface(null, android.graphics.Typeface.BOLD);
             } else {
