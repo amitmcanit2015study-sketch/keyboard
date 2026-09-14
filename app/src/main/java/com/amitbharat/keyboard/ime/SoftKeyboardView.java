@@ -1,0 +1,526 @@
+package com.amitbharat.keyboard.ime;
+
+import android.content.Context;
+import android.graphics.Canvas;
+import android.graphics.Paint;
+import android.graphics.Rect;
+import android.graphics.RectF;
+import android.graphics.drawable.Drawable;
+import android.media.AudioManager;
+import android.os.Handler;
+import android.os.Looper;
+import android.util.AttributeSet;
+import android.view.HapticFeedbackConstants;
+import android.view.MotionEvent;
+import android.view.View;
+import android.widget.PopupWindow;
+import android.widget.TextView;
+import androidx.core.content.ContextCompat;
+import com.amitbharat.keyboard.R;
+import com.amitbharat.keyboard.engine.KeyboardPreferences;
+import java.util.ArrayList;
+import java.util.List;
+
+public class SoftKeyboardView extends View {
+
+    public interface OnKeyboardActionListener {
+        void onKey(int primaryCode, KeyboardKey key);
+        void onText(CharSequence text);
+    }
+
+    private OnKeyboardActionListener actionListener;
+    private KeyboardPreferences preferences;
+    private AudioManager audioManager;
+
+    private int currentMode = KeyboardLayoutHelper.MODE_ALPHA;
+    private boolean isShifted = false;
+    private boolean isCapsLock = false;
+    private long lastShiftTime = 0;
+
+    private List<List<KeyboardKey>> keyRows = new ArrayList<>();
+
+    // Drawing paints
+    private Paint paintKeyText;
+    private Paint paintKeyHint;
+    private Paint paintKeyBg;
+    private Paint paintKeyBgAction;
+    private Paint paintKeyBgAccent;
+    private Paint paintKeyBorder;
+
+    private int colorKeyBgNormal;
+    private int colorKeyBgAction;
+    private int colorKeyBgAccent;
+    private int colorKeyText;
+    private int colorKeyHint;
+    private int colorKeyBorder;
+
+    private KeyboardKey activeKey = null;
+    private final Handler repeatHandler = new Handler(Looper.getMainLooper());
+    private boolean isRepeating = false;
+
+    // Key popup preview
+    private PopupWindow popupWindow;
+    private TextView popupTextView;
+
+    public SoftKeyboardView(Context context) {
+        super(context);
+        init(context);
+    }
+
+    public SoftKeyboardView(Context context, AttributeSet attrs) {
+        super(context, attrs);
+        init(context);
+    }
+
+    public SoftKeyboardView(Context context, AttributeSet attrs, int defStyleAttr) {
+        super(context, attrs, defStyleAttr);
+        init(context);
+    }
+
+    private void init(Context context) {
+        preferences = new KeyboardPreferences(context);
+        audioManager = (AudioManager) context.getSystemService(Context.AUDIO_SERVICE);
+
+        // Load colors
+        resolveThemeColors();
+
+        paintKeyText = new Paint(Paint.ANTI_ALIAS_FLAG);
+        paintKeyText.setTextAlign(Paint.Align.CENTER);
+        paintKeyText.setColor(colorKeyText);
+
+        paintKeyHint = new Paint(Paint.ANTI_ALIAS_FLAG);
+        paintKeyHint.setTextAlign(Paint.Align.RIGHT);
+        paintKeyHint.setColor(colorKeyHint);
+
+        paintKeyBg = new Paint(Paint.ANTI_ALIAS_FLAG);
+        paintKeyBg.setStyle(Paint.Style.FILL);
+        paintKeyBg.setColor(colorKeyBgNormal);
+
+        paintKeyBgAction = new Paint(Paint.ANTI_ALIAS_FLAG);
+        paintKeyBgAction.setStyle(Paint.Style.FILL);
+        paintKeyBgAction.setColor(colorKeyBgAction);
+
+        paintKeyBgAccent = new Paint(Paint.ANTI_ALIAS_FLAG);
+        paintKeyBgAccent.setStyle(Paint.Style.FILL);
+        paintKeyBgAccent.setColor(colorKeyBgAccent);
+
+        paintKeyBorder = new Paint(Paint.ANTI_ALIAS_FLAG);
+        paintKeyBorder.setStyle(Paint.Style.STROKE);
+        paintKeyBorder.setStrokeWidth(1.5f);
+        paintKeyBorder.setColor(colorKeyBorder);
+
+        // Init popup preview
+        popupTextView = new TextView(context);
+        popupTextView.setBackgroundResource(R.drawable.bg_key_popup);
+        popupTextView.setTextColor(colorKeyText);
+        popupTextView.setTextSize(26);
+        popupTextView.setGravity(android.view.Gravity.CENTER);
+        popupWindow = new PopupWindow(popupTextView, dpToPx(56), dpToPx(64));
+        popupWindow.setTouchable(false);
+
+        buildLayout();
+    }
+
+    public void resolveThemeColors() {
+        Context ctx = getContext();
+        String theme = preferences.getTheme();
+
+        colorKeyBgNormal = ContextCompat.getColor(ctx, R.color.key_bg_normal);
+        colorKeyBgAction = ContextCompat.getColor(ctx, R.color.key_bg_action);
+        colorKeyBgAccent = ContextCompat.getColor(ctx, R.color.md_theme_primary);
+        colorKeyText = ContextCompat.getColor(ctx, R.color.key_text_color);
+        colorKeyHint = ContextCompat.getColor(ctx, R.color.key_hint_color);
+        colorKeyBorder = ContextCompat.getColor(ctx, R.color.key_border);
+
+        if (KeyboardPreferences.THEME_LIGHT.equals(theme)) {
+            colorKeyBgNormal = 0xFFFFFFFF;
+            colorKeyBgAction = 0xFFD7DCE0;
+            colorKeyText = 0xFF1F2937;
+            colorKeyHint = 0xFF9CA3AF;
+            colorKeyBorder = 0xFFCBD5E1;
+            colorKeyBgAccent = 0xFF0D6EFD;
+        } else if (KeyboardPreferences.THEME_DARK.equals(theme)) {
+            colorKeyBgNormal = 0xFF2A2E39;
+            colorKeyBgAction = 0xFF21252E;
+            colorKeyText = 0xFFF1F5F9;
+            colorKeyHint = 0xFF64748B;
+            colorKeyBorder = 0xFF383D4A;
+            colorKeyBgAccent = 0xFF3B82F6;
+        } else if (KeyboardPreferences.THEME_BLUE.equals(theme)) {
+            colorKeyBgNormal = 0xFFEBF3FE;
+            colorKeyBgAction = 0xFFD2E3FC;
+            colorKeyText = 0xFF0A3871;
+            colorKeyHint = 0xFF6082B6;
+            colorKeyBorder = 0xFFADC8F0;
+            colorKeyBgAccent = 0xFF1976D2;
+        } else if (KeyboardPreferences.THEME_PURPLE.equals(theme)) {
+            colorKeyBgNormal = 0xFFF7F2FA;
+            colorKeyBgAction = 0xFFECE6F0;
+            colorKeyText = 0xFF381E72;
+            colorKeyHint = 0xFF7D5260;
+            colorKeyBorder = 0xFFD0BCFF;
+            colorKeyBgAccent = 0xFF7C3AED;
+        } else if (KeyboardPreferences.THEME_GREEN.equals(theme)) {
+            colorKeyBgNormal = 0xFFEBF7ED;
+            colorKeyBgAction = 0xFFD5E8D4;
+            colorKeyText = 0xFF144D20;
+            colorKeyHint = 0xFF588157;
+            colorKeyBorder = 0xFFB7E4C7;
+            colorKeyBgAccent = 0xFF059669;
+        } else if (KeyboardPreferences.THEME_AMOLED.equals(theme)) {
+            colorKeyBgNormal = 0xFF121212;
+            colorKeyBgAction = 0xFF000000;
+            colorKeyText = 0xFFFFFFFF;
+            colorKeyHint = 0xFF888888;
+            colorKeyBorder = 0xFF222222;
+            colorKeyBgAccent = 0xFF2563EB;
+        }
+
+        if (paintKeyText != null) {
+            paintKeyText.setColor(colorKeyText);
+            paintKeyHint.setColor(colorKeyHint);
+            paintKeyBg.setColor(colorKeyBgNormal);
+            paintKeyBgAction.setColor(colorKeyBgAction);
+            paintKeyBgAccent.setColor(colorKeyBgAccent);
+            paintKeyBorder.setColor(colorKeyBorder);
+            if (popupTextView != null) popupTextView.setTextColor(colorKeyText);
+            invalidate();
+        }
+    }
+
+    public void setOnKeyboardActionListener(OnKeyboardActionListener listener) {
+        this.actionListener = listener;
+    }
+
+    public void setMode(int mode) {
+        this.currentMode = mode;
+        buildLayout();
+        requestLayout();
+        invalidate();
+    }
+
+    public int getMode() {
+        return currentMode;
+    }
+
+    public void setShifted(boolean shifted) {
+        this.isShifted = shifted;
+        if (!shifted) isCapsLock = false;
+        if (currentMode == KeyboardLayoutHelper.MODE_ALPHA) {
+            buildLayout();
+            invalidate();
+        }
+    }
+
+    public boolean isShifted() {
+        return isShifted || isCapsLock;
+    }
+
+    private void buildLayout() {
+        if (currentMode == KeyboardLayoutHelper.MODE_NUMPAD) {
+            keyRows = KeyboardLayoutHelper.createNumpadLayout();
+        } else if (currentMode == KeyboardLayoutHelper.MODE_NUMERIC) {
+            keyRows = KeyboardLayoutHelper.createNumericLayout();
+        } else if (currentMode == KeyboardLayoutHelper.MODE_SYMBOLS) {
+            keyRows = KeyboardLayoutHelper.createSymbolsLayout();
+        } else {
+            keyRows = KeyboardLayoutHelper.createQwertyLayout(isShifted, isCapsLock);
+        }
+        computeKeyPositions();
+    }
+
+    @Override
+    protected void onMeasure(int widthMeasureSpec, int heightMeasureSpec) {
+        int width = MeasureSpec.getSize(widthMeasureSpec);
+        // Height of the soft keyboard keys ~ 280dp (increased for larger, more comfortable keys)
+        int desiredHeight = dpToPx(280);
+        setMeasuredDimension(width, desiredHeight);
+    }
+
+    @Override
+    protected void onSizeChanged(int w, int h, int oldw, int oldh) {
+        super.onSizeChanged(w, h, oldw, oldh);
+        computeKeyPositions();
+    }
+
+    private void computeKeyPositions() {
+        int width = getWidth();
+        int height = getHeight();
+        if (width <= 0 || height <= 0 || keyRows.isEmpty()) return;
+
+        int rowCount = keyRows.size();
+        float keyGapHorizontal = dpToPx(4);
+        float keyGapVertical = dpToPx(6);
+        float paddingHorizontal = dpToPx(4);
+        float paddingTop = dpToPx(6);
+        float paddingBottom = dpToPx(6);
+
+        float availableHeight = height - paddingTop - paddingBottom - (keyGapVertical * (rowCount - 1));
+        float rowHeight = availableHeight / rowCount;
+
+        for (int r = 0; r < rowCount; r++) {
+            List<KeyboardKey> row = keyRows.get(r);
+            float totalWeight = 0;
+            for (KeyboardKey key : row) {
+                totalWeight += key.weight;
+            }
+
+            float availableWidth = width - (paddingHorizontal * 2) - (keyGapHorizontal * (row.size() - 1));
+            float unitWidth = availableWidth / totalWeight;
+
+            float currentLeft = paddingHorizontal;
+            float top = paddingTop + r * (rowHeight + keyGapVertical);
+            float bottom = top + rowHeight;
+
+            for (KeyboardKey key : row) {
+                float keyWidth = unitWidth * key.weight;
+                key.bounds.set(currentLeft, top, currentLeft + keyWidth, bottom);
+                currentLeft += keyWidth + keyGapHorizontal;
+            }
+        }
+    }
+
+    @Override
+    protected void onDraw(Canvas canvas) {
+        super.onDraw(canvas);
+        float cornerRadius = dpToPx(8);
+
+        paintKeyText.setTextSize(dpToPx(20));
+        paintKeyHint.setTextSize(dpToPx(10));
+
+        for (List<KeyboardKey> row : keyRows) {
+            for (KeyboardKey key : row) {
+                RectF b = key.bounds;
+
+                // Pick background paint
+                Paint bgPaint = paintKeyBg;
+                if (key.isAccent) {
+                    bgPaint = paintKeyBgAccent;
+                } else if (key.isAction) {
+                    bgPaint = paintKeyBgAction;
+                }
+
+                // Pressed effect
+                if (key.isPressed) {
+                    canvas.drawRoundRect(b, cornerRadius, cornerRadius, paintKeyBgAction);
+                } else {
+                    canvas.drawRoundRect(b, cornerRadius, cornerRadius, bgPaint);
+                }
+
+                // Border
+                canvas.drawRoundRect(b, cornerRadius, cornerRadius, paintKeyBorder);
+
+                // Draw icon if present
+                if (key.iconResId != 0) {
+                    Drawable icon = ContextCompat.getDrawable(getContext(), key.iconResId);
+                    if (icon != null) {
+                        int iconColor = key.isAccent ? 0xFFFFFFFF : colorKeyText;
+                        icon.setTint(iconColor);
+                        int iconSize = dpToPx(22);
+                        int cx = (int) b.centerX();
+                        int cy = (int) b.centerY();
+                        icon.setBounds(cx - iconSize / 2, cy - iconSize / 2, cx + iconSize / 2, cy + iconSize / 2);
+                        icon.draw(canvas);
+                    }
+                } else {
+                    // Draw label text
+                    int textColor = key.isAccent ? 0xFFFFFFFF : colorKeyText;
+                    paintKeyText.setColor(textColor);
+                    if (key.code == KeyboardKey.CODE_SPACE) {
+                        paintKeyText.setTextSize(dpToPx(13));
+                    } else if (key.label != null && key.label.length() > 1) {
+                        paintKeyText.setTextSize(dpToPx(14));
+                    } else {
+                        paintKeyText.setTextSize(dpToPx(20));
+                    }
+
+                    Paint.FontMetrics fm = paintKeyText.getFontMetrics();
+                    float baseline = b.centerY() - (fm.ascent + fm.descent) / 2;
+                    canvas.drawText(key.label, b.centerX(), baseline, paintKeyText);
+                }
+
+                // Draw secondary hint if present
+                if (key.hint != null) {
+                    canvas.drawText(key.hint, b.right - dpToPx(6), b.top + dpToPx(13), paintKeyHint);
+                }
+            }
+        }
+    }
+
+    @Override
+    public boolean onTouchEvent(MotionEvent event) {
+        float x = event.getX();
+        float y = event.getY();
+
+        switch (event.getActionMasked()) {
+            case MotionEvent.ACTION_DOWN:
+                KeyboardKey key = findKey(x, y);
+                if (key != null) {
+                    activeKey = key;
+                    key.isPressed = true;
+                    handleFeedback();
+                    showPopupPreview(key);
+                    invalidate();
+
+                    if (key.code == KeyboardKey.CODE_BACKSPACE) {
+                        startBackspaceRepeat();
+                    }
+                }
+                return true;
+
+            case MotionEvent.ACTION_MOVE:
+                KeyboardKey currentKey = findKey(x, y);
+                if (currentKey != activeKey) {
+                    if (activeKey != null) {
+                        activeKey.isPressed = false;
+                    }
+                    activeKey = currentKey;
+                    if (activeKey != null) {
+                        activeKey.isPressed = true;
+                        showPopupPreview(activeKey);
+                    } else {
+                        dismissPopupPreview();
+                    }
+                    invalidate();
+                }
+                return true;
+
+            case MotionEvent.ACTION_UP:
+                stopBackspaceRepeat();
+                dismissPopupPreview();
+                if (activeKey != null) {
+                    activeKey.isPressed = false;
+                    onKeyReleased(activeKey);
+                    activeKey = null;
+                    invalidate();
+                }
+                return true;
+
+            case MotionEvent.ACTION_CANCEL:
+                stopBackspaceRepeat();
+                dismissPopupPreview();
+                if (activeKey != null) {
+                    activeKey.isPressed = false;
+                    activeKey = null;
+                    invalidate();
+                }
+                return true;
+        }
+        return super.onTouchEvent(event);
+    }
+
+    private void onKeyReleased(KeyboardKey key) {
+        if (key.code == KeyboardKey.CODE_SHIFT) {
+            long now = System.currentTimeMillis();
+            if (now - lastShiftTime < 300) {
+                // Double tap shift = caps lock
+                isCapsLock = !isCapsLock;
+                isShifted = isCapsLock;
+            } else {
+                isShifted = !isShifted;
+                if (!isShifted) isCapsLock = false;
+            }
+            lastShiftTime = now;
+            buildLayout();
+            invalidate();
+            return;
+        }
+
+        if (key.code == KeyboardKey.CODE_MODE_NUM) {
+            setMode(KeyboardLayoutHelper.MODE_NUMERIC);
+            return;
+        }
+
+        if (key.code == KeyboardKey.CODE_MODE_ALPHA) {
+            setMode(KeyboardLayoutHelper.MODE_ALPHA);
+            return;
+        }
+
+        if (key.code == KeyboardKey.CODE_MODE_SYM) {
+            setMode(KeyboardLayoutHelper.MODE_SYMBOLS);
+            return;
+        }
+
+        if (actionListener != null) {
+            actionListener.onKey(key.code, key);
+        }
+
+        // If not caps locked, auto revert shift after typing a character
+        if (isShifted && !isCapsLock && key.code > 0) {
+            isShifted = false;
+            buildLayout();
+            invalidate();
+        }
+    }
+
+    private void handleFeedback() {
+        if (preferences.isVibrateEnabled()) {
+            performHapticFeedback(HapticFeedbackConstants.KEYBOARD_TAP);
+        }
+        if (preferences.isSoundEnabled() && audioManager != null) {
+            audioManager.playSoundEffect(AudioManager.FX_KEYPRESS_STANDARD, 1.0f);
+        }
+    }
+
+    private void showPopupPreview(KeyboardKey key) {
+        if (!preferences.isPopupEnabled() || key.code < 32 || key.label == null || key.label.length() > 1) {
+            dismissPopupPreview();
+            return;
+        }
+
+        popupTextView.setText(key.label);
+        int[] location = new int[2];
+        getLocationInWindow(location);
+
+        int posX = (int) (location[0] + key.bounds.centerX() - popupWindow.getWidth() / 2);
+        int posY = (int) (location[1] + key.bounds.top - popupWindow.getHeight() - dpToPx(8));
+
+        if (!popupWindow.isShowing()) {
+            popupWindow.showAtLocation(this, 0, posX, posY);
+        } else {
+            popupWindow.update(posX, posY, popupWindow.getWidth(), popupWindow.getHeight());
+        }
+    }
+
+    private void dismissPopupPreview() {
+        if (popupWindow != null && popupWindow.isShowing()) {
+            popupWindow.dismiss();
+        }
+    }
+
+    private void startBackspaceRepeat() {
+        isRepeating = true;
+        repeatHandler.postDelayed(new Runnable() {
+            @Override
+            public void run() {
+                if (isRepeating && activeKey != null && activeKey.code == KeyboardKey.CODE_BACKSPACE) {
+                    if (actionListener != null) {
+                        actionListener.onKey(KeyboardKey.CODE_BACKSPACE, activeKey);
+                    }
+                    handleFeedback();
+                    repeatHandler.postDelayed(this, 50); // repeat every 50ms
+                }
+            }
+        }, 400); // 400ms initial delay
+    }
+
+    private void stopBackspaceRepeat() {
+        isRepeating = false;
+        repeatHandler.removeCallbacksAndMessages(null);
+    }
+
+    private KeyboardKey findKey(float x, float y) {
+        for (List<KeyboardKey> row : keyRows) {
+            for (KeyboardKey key : row) {
+                if (key.bounds.contains(x, y)) {
+                    return key;
+                }
+            }
+        }
+        return null;
+    }
+
+    private int dpToPx(float dp) {
+        return (int) (dp * getResources().getDisplayMetrics().density + 0.5f);
+    }
+}

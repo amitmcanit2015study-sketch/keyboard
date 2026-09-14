@@ -1,0 +1,48 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- Primary Material 3 Brand Colors -->
+    <color name="md_theme_primary">#0D6EFD</color>
+    <color name="md_theme_onPrimary">#FFFFFF</color>
+    <color name="md_theme_primaryContainer">#DCE8FD</color>
+    <color name="md_theme_onPrimaryContainer">#042B66</color>
+    <color name="md_theme_secondary">#595E6B</color>
+    <color name="md_theme_onSecondary">#FFFFFF</color>
+    <color name="md_theme_surface">#F8F9FA</color>
+    <color name="md_theme_onSurface">#1A1C1E</color>
+    <color name="md_theme_surfaceVariant">#E2E2E9</color>
+    <color name="md_theme_onSurfaceVariant">#44474E</color>
+    <color name="md_theme_outline">#74777F</color>
+    <color name="md_theme_outlineVariant">#C4C6CF</color>
+    <color name="md_theme_background">#FFFFFF</color>
+    <color name="md_theme_onBackground">#1A1C1E</color>
+
+    <!-- Success & Alert -->
+    <color name="color_success">#198754</color>
+    <color name="color_warning">#FD7E14</color>
+    <color name="color_error">#DC3545</color>
+
+    <!-- Soft Keyboard Default (Light / System Fallback) -->
+    <color name="keyboard_bg">#ECEFF1</color>
+    <color name="candidate_bar_bg">#F4F6F8</color>
+    <color name="candidate_bar_border">#D0D5DD</color>
+    <color name="key_bg_normal">#FFFFFF</color>
+    <color name="key_bg_action">#D7DCE0</color>
+    <color name="key_text_color">#1F2937</color>
+    <color name="key_text_action">#374151</color>
+    <color name="key_hint_color">#9CA3AF</color>
+    <color name="key_border">#CBD5E1</color>
+    <color name="key_popup_bg">#FFFFFF</color>
+
+    <color name="suggestion_chip_bg">#FFFFFF</color>
+    <color name="suggestion_chip_border">#E2E8F0</color>
+    <color name="suggestion_chip_text">#1F2937</color>
+    <color name="suggestion_chip_active_bg">#E0EAFF</color>
+    <color name="suggestion_chip_active_text">#0D6EFD</color>
+
+    <color name="lang_pill_bg">#0D6EFD</color>
+    <color name="lang_pill_text">#FFFFFF</color>
+    <color name="lang_pill_border">#0A58CA</color>
+
+    <color name="lang_pill_inactive_bg">#E2E8F0</color>
+    <color name="lang_pill_inactive_text">#475569</color>
+</resources>

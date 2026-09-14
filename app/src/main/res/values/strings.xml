@@ -1,0 +1,59 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">Indic Keyboard</string>
+    <string name="keyboard_name">Indic Keyboard (Hindi / English)</string>
+    <string name="app_header_subtitle">by Amit Bharat</string>
+    <string name="developer_name">Amit Bharat</string>
+    <string name="developed_by_full">Developed by: Amit Bharat</string>
+    <string name="company_name">Rooys Soft Tech</string>
+    <string name="company_name_full">Company: Rooys Soft Tech</string>
+    <string name="company_email">rooyssofttech2020@gmail.com</string>
+    <string name="developed_by">Developed by Amit Bharat</string>
+    <string name="app_version_name">v1.0.0 (Production Build)</string>
+    <string name="about_footer">100% Offline • No Ads • Zero Tracking</string>
+    <string name="about_description">Indic Keyboard is a fast, lightweight, and privacy-first bilingual soft keyboard designed for Android. Effortlessly type in English or phonetically transliterate Hinglish into Hindi (Devanagari script) with smart suggestions, sleek Material themes, and offline privacy.</string>
+
+    <string name="subtype_hinglish">Hindi (Hinglish Transliteration)</string>
+    <string name="subtype_english">English (US)</string>
+
+    <!-- Setup Wizard -->
+    <string name="setup_title">Keyboard Setup</string>
+    <string name="step1_title">Step 1: Enable Keyboard</string>
+    <string name="step1_desc">Enable Indic Keyboard in your Android system input settings.</string>
+    <string name="step1_btn">Enable in Settings</string>
+    <string name="step1_done">Keyboard Enabled</string>
+
+    <string name="step2_title">Step 2: Select Input Method</string>
+    <string name="step2_desc">Set Indic Keyboard as your active default keyboard.</string>
+    <string name="step2_btn">Switch Input Method</string>
+    <string name="step2_done">Keyboard Active</string>
+
+    <string name="step3_title">Step 3: Test Typing</string>
+    <string name="step3_desc">Try typing below! Tap [HN] on top-left to type Hinglish -> Hindi, or [EN] for English suggestions.</string>
+    <string name="test_hint">Type here to test (e.g. namaste, kya, hello)...</string>
+
+    <!-- Settings -->
+    <string name="settings_title">Keyboard Settings</string>
+    <string name="pref_theme_title">Keyboard Theme</string>
+    <string name="pref_theme_desc">Choose visual style and appearance</string>
+    <string name="pref_sound_title">Sound on Keypress</string>
+    <string name="pref_sound_desc">Play subtle click sound when typing</string>
+    <string name="pref_vibrate_title">Vibrate on Keypress</string>
+    <string name="pref_vibrate_desc">Provide haptic feedback for key touches</string>
+    <string name="pref_popup_title">Popup on Keypress</string>
+    <string name="pref_popup_desc">Show enlarged key preview character when tapped</string>
+    <string name="pref_autocap_title">Auto-Capitalization</string>
+    <string name="pref_autocap_desc">Capitalize first letter of sentences automatically</string>
+    <string name="pref_default_lang_title">Default Language</string>
+    <string name="pref_default_lang_desc">Preferred startup language mode</string>
+
+    <!-- Actions & Common -->
+    <string name="action_settings">Settings</string>
+    <string name="action_about">About</string>
+    <string name="share_app">Share APK</string>
+    <string name="download_apk">Download APK</string>
+    <string name="send_feedback">Send Feedback</string>
+
+    <string name="lang_hindi">हिंदी (HN)</string>
+    <string name="lang_english">English (EN)</string>
+</resources>

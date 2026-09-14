@@ -1,0 +1,34 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:id="@+id/keyboardRoot"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:background="@color/keyboard_bg"
+    android:orientation="vertical">
+
+    <!-- Top Candidate / Suggestion Strip with Top-Left HN/EN Language Toggle -->
+    <com.amitbharat.keyboard.ime.CandidateStripView
+        android:id="@+id/candidateStripView"
+        android:layout_width="match_parent"
+        android:layout_height="44dp" />
+
+    <!-- Keyboard Pages Container -->
+    <FrameLayout
+        android:id="@+id/keyboardContainer"
+        android:layout_width="match_parent"
+        android:layout_height="280dp">
+
+        <com.amitbharat.keyboard.ime.SoftKeyboardView
+            android:id="@+id/softKeyboardView"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent" />
+
+        <com.amitbharat.keyboard.ime.EmojiKeyboardView
+            android:id="@+id/emojiKeyboardView"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:visibility="gone" />
+
+    </FrameLayout>
+
+</LinearLayout>

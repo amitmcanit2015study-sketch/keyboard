@@ -1,0 +1,43 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- Primary Material 3 Brand Colors - Night -->
+    <color name="md_theme_primary">#A8C7FA</color>
+    <color name="md_theme_onPrimary">#042B66</color>
+    <color name="md_theme_primaryContainer">#0842A0</color>
+    <color name="md_theme_onPrimaryContainer">#DCE8FD</color>
+    <color name="md_theme_secondary">#C2C7D6</color>
+    <color name="md_theme_onSecondary">#2B313D</color>
+    <color name="md_theme_surface">#1A1C1E</color>
+    <color name="md_theme_onSurface">#E2E2E9</color>
+    <color name="md_theme_surfaceVariant">#44474E</color>
+    <color name="md_theme_onSurfaceVariant">#C4C6CF</color>
+    <color name="md_theme_outline">#8E9199</color>
+    <color name="md_theme_outlineVariant">#44474E</color>
+    <color name="md_theme_background">#121316</color>
+    <color name="md_theme_onBackground">#E2E2E9</color>
+
+    <!-- Soft Keyboard Dark Theme -->
+    <color name="keyboard_bg">#181A20</color>
+    <color name="candidate_bar_bg">#20232B</color>
+    <color name="candidate_bar_border">#2C303B</color>
+    <color name="key_bg_normal">#2A2E39</color>
+    <color name="key_bg_action">#21252E</color>
+    <color name="key_text_color">#F1F5F9</color>
+    <color name="key_text_action">#CBD5E1</color>
+    <color name="key_hint_color">#64748B</color>
+    <color name="key_border">#383D4A</color>
+    <color name="key_popup_bg">#2A2E39</color>
+
+    <color name="suggestion_chip_bg">#2A2E39</color>
+    <color name="suggestion_chip_border">#383D4A</color>
+    <color name="suggestion_chip_text">#F1F5F9</color>
+    <color name="suggestion_chip_active_bg">#0842A0</color>
+    <color name="suggestion_chip_active_text">#DCE8FD</color>
+
+    <color name="lang_pill_bg">#A8C7FA</color>
+    <color name="lang_pill_text">#042B66</color>
+    <color name="lang_pill_border">#DCE8FD</color>
+
+    <color name="lang_pill_inactive_bg">#2A2E39</color>
+    <color name="lang_pill_inactive_text">#94A3B8</color>
+</resources>
