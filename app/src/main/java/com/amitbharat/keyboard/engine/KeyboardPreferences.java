@@ -11,22 +11,31 @@ public class KeyboardPreferences {
 
     public static final String PREF_CURRENT_LANG = "pref_current_lang";
     public static final String PREF_SELECTED_LANGS = "pref_selected_langs";
-    private static final String PREF_THEME = "pref_theme";
-    private static final String PREF_SOUND = "pref_sound";
-    private static final String PREF_VIBRATE = "pref_vibrate";
-    private static final String PREF_POPUP = "pref_popup";
-    private static final String PREF_AUTOCAP = "pref_autocap";
+    public static final String PREF_THEME = "pref_theme";
+    public static final String PREF_SOUND = "pref_sound";
+    public static final String PREF_VIBRATE = "pref_vibrate";
+    public static final String PREF_POPUP = "pref_popup";
+    public static final String PREF_AUTOCAP = "pref_autocap";
+
+    // Keys & Layout
+    public static final String PREF_NUMBER_ROW = "pref_number_row";
+    public static final String PREF_EMOJI_KEY = "pref_emoji_key";
+    public static final String PREF_LANG_KEY = "pref_lang_key";
+    public static final String PREF_COMMA_KEY = "pref_comma_key";
+    public static final String PREF_FULLSTOP_KEY = "pref_fullstop_key";
+    public static final String PREF_SUGGESTION_STRIP = "pref_suggestion_strip";
+
+    // Shortcuts & Corrections
+    public static final String PREF_DOUBLE_SPACE_PERIOD = "pref_double_space_period";
+    public static final String PREF_AUTO_CORRECT = "pref_auto_correct";
+    public static final String PREF_WORD_SUGGESTIONS = "pref_word_suggestions";
+    public static final String PREF_NEXT_WORD_SUGGESTIONS = "pref_next_word_suggestions";
+    public static final String PREF_EMOJI_FAST_ROW = "pref_emoji_fast_row";
 
     public static final String LANG_HINDI = "HN";
     public static final String LANG_ENGLISH = "EN";
 
     public static final String THEME_SYSTEM = "system";
-    public static final String THEME_LIGHT = "light";
-    public static final String THEME_DARK = "dark";
-    public static final String THEME_BLUE = "blue";
-    public static final String THEME_PURPLE = "purple";
-    public static final String THEME_GREEN = "green";
-    public static final String THEME_AMOLED = "amoled";
 
     private final SharedPreferences prefs;
 
@@ -50,7 +59,6 @@ public class KeyboardPreferences {
             list.add(LANG_HINDI);
             list.add(LANG_ENGLISH);
         }
-        // Enforce maximum 2
         if (list.size() > 2) {
             list = list.subList(0, 2);
         }
@@ -70,7 +78,6 @@ public class KeyboardPreferences {
         }
         prefs.edit().putString(PREF_SELECTED_LANGS, sb.toString()).apply();
 
-        // If current language is no longer in selected languages, set to first selected
         String current = getCurrentLanguage();
         if (!langs.contains(current)) {
             setCurrentLanguage(langs.get(0));
@@ -122,7 +129,6 @@ public class KeyboardPreferences {
     }
 
     public String getTheme() {
-        // Keyboard theme is permanently by default system
         return THEME_SYSTEM;
     }
 
@@ -160,5 +166,103 @@ public class KeyboardPreferences {
 
     public void setAutoCapEnabled(boolean enabled) {
         prefs.edit().putBoolean(PREF_AUTOCAP, enabled).apply();
+    }
+
+    // Number row
+    public boolean isNumberRowEnabled() {
+        return prefs.getBoolean(PREF_NUMBER_ROW, true);
+    }
+
+    public void setNumberRowEnabled(boolean enabled) {
+        prefs.edit().putBoolean(PREF_NUMBER_ROW, enabled).apply();
+    }
+
+    // Emoji key vs Language switch key
+    public boolean isEmojiKeyEnabled() {
+        return prefs.getBoolean(PREF_EMOJI_KEY, true);
+    }
+
+    public void setEmojiKeyEnabled(boolean enabled) {
+        prefs.edit().putBoolean(PREF_EMOJI_KEY, enabled).apply();
+    }
+
+    public boolean isLanguageKeyEnabled() {
+        return prefs.getBoolean(PREF_LANG_KEY, false);
+    }
+
+    public void setLanguageKeyEnabled(boolean enabled) {
+        prefs.edit().putBoolean(PREF_LANG_KEY, enabled).apply();
+    }
+
+    // Comma key
+    public boolean isCommaKeyEnabled() {
+        return prefs.getBoolean(PREF_COMMA_KEY, true);
+    }
+
+    public void setCommaKeyEnabled(boolean enabled) {
+        prefs.edit().putBoolean(PREF_COMMA_KEY, enabled).apply();
+    }
+
+    // Full stop key
+    public boolean isFullStopKeyEnabled() {
+        return prefs.getBoolean(PREF_FULLSTOP_KEY, true);
+    }
+
+    public void setFullStopKeyEnabled(boolean enabled) {
+        prefs.edit().putBoolean(PREF_FULLSTOP_KEY, enabled).apply();
+    }
+
+    // Suggestion strip
+    public boolean isSuggestionStripEnabled() {
+        return prefs.getBoolean(PREF_SUGGESTION_STRIP, true);
+    }
+
+    public void setSuggestionStripEnabled(boolean enabled) {
+        prefs.edit().putBoolean(PREF_SUGGESTION_STRIP, enabled).apply();
+    }
+
+    // Double-space period
+    public boolean isDoubleSpacePeriodEnabled() {
+        return prefs.getBoolean(PREF_DOUBLE_SPACE_PERIOD, true);
+    }
+
+    public void setDoubleSpacePeriodEnabled(boolean enabled) {
+        prefs.edit().putBoolean(PREF_DOUBLE_SPACE_PERIOD, enabled).apply();
+    }
+
+    // Auto-correct
+    public boolean isAutoCorrectEnabled() {
+        return prefs.getBoolean(PREF_AUTO_CORRECT, true);
+    }
+
+    public void setAutoCorrectEnabled(boolean enabled) {
+        prefs.edit().putBoolean(PREF_AUTO_CORRECT, enabled).apply();
+    }
+
+    // Word suggestions
+    public boolean isWordSuggestionsEnabled() {
+        return prefs.getBoolean(PREF_WORD_SUGGESTIONS, true);
+    }
+
+    public void setWordSuggestionsEnabled(boolean enabled) {
+        prefs.edit().putBoolean(PREF_WORD_SUGGESTIONS, enabled).apply();
+    }
+
+    // Next-word suggestions
+    public boolean isNextWordSuggestionsEnabled() {
+        return prefs.getBoolean(PREF_NEXT_WORD_SUGGESTIONS, true);
+    }
+
+    public void setNextWordSuggestionsEnabled(boolean enabled) {
+        prefs.edit().putBoolean(PREF_NEXT_WORD_SUGGESTIONS, enabled).apply();
+    }
+
+    // Emoji fast-access row
+    public boolean isEmojiFastRowEnabled() {
+        return prefs.getBoolean(PREF_EMOJI_FAST_ROW, false);
+    }
+
+    public void setEmojiFastRowEnabled(boolean enabled) {
+        prefs.edit().putBoolean(PREF_EMOJI_FAST_ROW, enabled).apply();
     }
 }

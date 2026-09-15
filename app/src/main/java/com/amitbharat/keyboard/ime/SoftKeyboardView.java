@@ -142,13 +142,9 @@ public class SoftKeyboardView extends View {
             colorKeyBgAccent = ContextCompat.getColor(ctx, R.color.md_theme_primaryContainer);
         }
 
-        if (ctx.getTheme().resolveAttribute(com.google.android.material.R.attr.colorOnPrimaryContainer, tv, true)) {
-            colorKeyTextAccent = tv.data;
-        } else if (ctx.getTheme().resolveAttribute(com.google.android.material.R.attr.colorOnPrimary, tv, true)) {
-            colorKeyTextAccent = tv.data;
-        } else {
-            colorKeyTextAccent = ContextCompat.getColor(ctx, R.color.md_theme_onPrimaryContainer);
-        }
+        // Ensure accent key text/icon is 100% visible and keyboard-friendly
+        double bgLum = androidx.core.graphics.ColorUtils.calculateLuminance(colorKeyBgAccent);
+        colorKeyTextAccent = (bgLum < 0.55) ? 0xFFFFFFFF : 0xFF111827;
 
         if (paintKeyText != null) {
             paintKeyText.setColor(colorKeyText);
@@ -198,9 +194,15 @@ public class SoftKeyboardView extends View {
         } else if (currentMode == KeyboardLayoutHelper.MODE_SYMBOLS) {
             keyRows = KeyboardLayoutHelper.createSymbolsLayout();
         } else {
-            keyRows = KeyboardLayoutHelper.createQwertyLayout(isShifted, isCapsLock);
+            keyRows = KeyboardLayoutHelper.createQwertyLayout(isShifted, isCapsLock, preferences);
         }
         computeKeyPositions();
+    }
+
+    public void rebuildLayout() {
+        buildLayout();
+        requestLayout();
+        invalidate();
     }
 
     @Override

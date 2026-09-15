@@ -13,19 +13,38 @@ public class KeyboardLayoutHelper {
     public static final int MODE_NUMPAD = 3;
 
     public static List<List<KeyboardKey>> createQwertyLayout(boolean isShifted, boolean isCapsLock) {
+        return createQwertyLayout(isShifted, isCapsLock, null);
+    }
+
+    public static List<List<KeyboardKey>> createQwertyLayout(boolean isShifted, boolean isCapsLock, com.amitbharat.keyboard.engine.KeyboardPreferences prefs) {
         List<List<KeyboardKey>> rows = new ArrayList<>();
 
-        // Row 1: Q W E R T Y U I O P (Hints: 1 2 3 4 5 6 7 8 9 0)
+        boolean showNumberRow = prefs != null && prefs.isNumberRowEnabled();
+        boolean showEmojiKey = prefs == null || prefs.isEmojiKeyEnabled();
+        boolean showCommaKey = prefs == null || prefs.isCommaKeyEnabled();
+        boolean showFullStopKey = prefs == null || prefs.isFullStopKeyEnabled();
+
+        // Optional Top Row: Dedicated Number Row (1 2 3 4 5 6 7 8 9 0)
+        if (showNumberRow) {
+            String[] numChars = {"1", "2", "3", "4", "5", "6", "7", "8", "9", "0"};
+            List<KeyboardKey> numRow = new ArrayList<>();
+            for (String n : numChars) {
+                numRow.add(new KeyboardKey(n.charAt(0), n, null, 1.0f));
+            }
+            rows.add(numRow);
+        }
+
+        // Row 1: Q W E R T Y U I O P
         String[] r1Chars = {"q", "w", "e", "r", "t", "y", "u", "i", "o", "p"};
         String[] r1Hints = {"1", "2", "3", "4", "5", "6", "7", "8", "9", "0"};
         List<KeyboardKey> row1 = new ArrayList<>();
         for (int i = 0; i < r1Chars.length; i++) {
             String ch = (isShifted || isCapsLock) ? r1Chars[i].toUpperCase() : r1Chars[i];
-            row1.add(new KeyboardKey(ch.charAt(0), ch, r1Hints[i], 1.0f));
+            row1.add(new KeyboardKey(ch.charAt(0), ch, showNumberRow ? null : r1Hints[i], 1.0f));
         }
         rows.add(row1);
 
-        // Row 2: A S D F G H J K L (Hints: @ # $ % & - + ( ))
+        // Row 2: A S D F G H J K L
         String[] r2Chars = {"a", "s", "d", "f", "g", "h", "j", "k", "l"};
         String[] r2Hints = {"@", "#", "$", "%", "&", "-", "+", "(", ")"};
         List<KeyboardKey> row2 = new ArrayList<>();
@@ -51,11 +70,31 @@ public class KeyboardLayoutHelper {
 
         // Row 4: [?123] [EMOJI] [,] [   SPACE   ] [.] [ENTER]
         List<KeyboardKey> row4 = new ArrayList<>();
-        row4.add(new KeyboardKey(KeyboardKey.CODE_MODE_NUM, "?123", 0, 1.4f, true, false));
-        row4.add(new KeyboardKey(KeyboardKey.CODE_EMOJI, "", R.drawable.ic_emoji, 1.1f, true, false));
-        row4.add(new KeyboardKey(',', ",", null, 1.0f));
-        row4.add(new KeyboardKey(KeyboardKey.CODE_SPACE, "Space", null, 4.2f));
-        row4.add(new KeyboardKey('.', ".", null, 1.0f));
+        row4.add(new KeyboardKey(KeyboardKey.CODE_MODE_NUM, "?123", 0, 1.3f, true, false));
+
+        // Dedicated Emoji key if enabled
+        if (showEmojiKey) {
+            row4.add(new KeyboardKey(KeyboardKey.CODE_EMOJI, "", R.drawable.ic_emoji, 1.1f, true, false));
+        }
+
+        // Comma key
+        if (showCommaKey) {
+            row4.add(new KeyboardKey(',', ",", null, 1.0f));
+        }
+
+        // Space bar (weight adapts)
+        float spaceWeight = 4.2f;
+        if (!showCommaKey) spaceWeight += 1.0f;
+        if (!showFullStopKey) spaceWeight += 1.0f;
+        if (!showEmojiKey) spaceWeight += 1.1f;
+        row4.add(new KeyboardKey(KeyboardKey.CODE_SPACE, "Space", null, spaceWeight));
+
+        // Period key
+        if (showFullStopKey) {
+            row4.add(new KeyboardKey('.', ".", null, 1.0f));
+        }
+
+        // Enter key
         row4.add(new KeyboardKey(KeyboardKey.CODE_ENTER, "", R.drawable.ic_enter, 1.4f, true, true));
         rows.add(row4);
 

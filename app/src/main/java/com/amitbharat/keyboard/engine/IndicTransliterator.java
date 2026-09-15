@@ -25,7 +25,17 @@ public class IndicTransliterator {
         initMalayalamDict();
         initPunjabiDict();
         initOdiaDict();
-        initUrduDict();
+        initBhojpuriDict();
+        initSanskritDict();
+        initNepaliDict();
+        initKonkaniDict();
+        initAssameseDict();
+        initMaithiliDict();
+        initRajasthaniDict();
+        initKashmiriDict();
+        initSindhiDict();
+        initDogriDict();
+        initSantaliDict();
     }
 
     private static void addWord(String lang, String roman, String... candidates) {
@@ -367,6 +377,7 @@ public class IndicTransliterator {
         int offset = 0;
         switch (targetLang.toUpperCase(Locale.ROOT)) {
             case "BN": // Bengali: 0x0980 - 0x0900 = 0x80
+            case "AS": // Assamese (Eastern Nagari): 0x80
                 offset = 0x80;
                 break;
             case "PA": // Gurmukhi: 0x0A00 - 0x0900 = 0x100

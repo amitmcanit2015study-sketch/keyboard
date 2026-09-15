@@ -132,7 +132,10 @@ public class CandidateStripView extends FrameLayout {
         }
 
         currentAccentColor = accentBg;
-        currentAccentTextColor = accentText;
+        
+        // Guarantee high-contrast text and icons on the language pill
+        double pillLum = androidx.core.graphics.ColorUtils.calculateLuminance(accentBg);
+        currentAccentTextColor = (pillLum < 0.55) ? 0xFFFFFFFF : 0xFF111827;
 
         android.graphics.drawable.GradientDrawable pillBg = new android.graphics.drawable.GradientDrawable();
         pillBg.setShape(android.graphics.drawable.GradientDrawable.RECTANGLE);
@@ -140,17 +143,23 @@ public class CandidateStripView extends FrameLayout {
         pillBg.setColor(accentBg);
         btnLanguageToggle.setBackground(pillBg);
 
-        tvActiveLang.setTextColor(accentText);
-        tvAltLang.setTextColor(accentText);
-        tvAltLang.setAlpha(0.75f);
+        tvActiveLang.setTextColor(currentAccentTextColor);
+        tvAltLang.setTextColor(currentAccentTextColor);
+        tvAltLang.setAlpha(0.85f);
         android.widget.ImageView ivGlobe = findViewById(R.id.ivGlobeIcon);
         if (ivGlobe != null) {
-            ivGlobe.setColorFilter(accentText);
+            ivGlobe.setColorFilter(currentAccentTextColor);
         }
         TextView tvDivider = findViewById(R.id.tvLangDivider);
         if (tvDivider != null) {
-            tvDivider.setTextColor(accentText);
-            tvDivider.setAlpha(0.6f);
+            tvDivider.setTextColor(currentAccentTextColor);
+            tvDivider.setAlpha(0.75f);
+        }
+
+        android.widget.ImageButton ibSettings = findViewById(R.id.ibSettings);
+        if (ibSettings != null) {
+            boolean isNight = (ctx.getResources().getConfiguration().uiMode & android.content.res.Configuration.UI_MODE_NIGHT_MASK) == android.content.res.Configuration.UI_MODE_NIGHT_YES;
+            ibSettings.setColorFilter(isNight ? 0xFFCBD5E1 : 0xFF4B5563);
         }
     }
 
@@ -161,24 +170,28 @@ public class CandidateStripView extends FrameLayout {
         }
 
         Context ctx = getContext();
+        boolean isNight = (ctx.getResources().getConfiguration().uiMode & android.content.res.Configuration.UI_MODE_NIGHT_MASK) == android.content.res.Configuration.UI_MODE_NIGHT_YES;
+        int primaryColor = isNight ? 0xFFFFFFFF : 0xFF111827;
+        int secondaryColor = isNight ? 0xFFD1D5DB : 0xFF4B5563;
+
         for (int i = 0; i < suggestions.size(); i++) {
             final String word = suggestions.get(i);
             TextView chip = new TextView(ctx);
             chip.setText(word);
-            chip.setTextSize(TypedValue.COMPLEX_UNIT_SP, 15f);
             chip.setGravity(Gravity.CENTER);
             chip.setSingleLine(true);
             chip.setBackgroundResource(R.drawable.bg_suggestion_chip);
             chip.setClickable(true);
             chip.setFocusable(true);
 
-            // Highlight the primary/first suggestion
+            // Highlight primary suggestion with pure, crisp contrast
             if (i == 0) {
-                chip.setTextColor(currentAccentColor);
+                chip.setTextColor(primaryColor);
                 chip.setTextSize(TypedValue.COMPLEX_UNIT_SP, 16f);
                 chip.setTypeface(null, android.graphics.Typeface.BOLD);
             } else {
-                chip.setTextColor(ContextCompat.getColor(ctx, R.color.suggestion_chip_text));
+                chip.setTextColor(secondaryColor);
+                chip.setTextSize(TypedValue.COMPLEX_UNIT_SP, 15f);
             }
 
             int padH = (int) TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP, 12, ctx.getResources().getDisplayMetrics());

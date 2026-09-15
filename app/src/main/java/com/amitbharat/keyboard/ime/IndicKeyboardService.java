@@ -31,6 +31,8 @@ public class IndicKeyboardService extends InputMethodService implements
     private final StringBuilder composingText = new StringBuilder();
     private List<String> currentSuggestions = Collections.emptyList();
 
+    private long lastSpaceTime = 0;
+
     private android.content.SharedPreferences sharedPreferences;
     private final android.content.SharedPreferences.OnSharedPreferenceChangeListener prefListener =
             (sp, key) -> {
@@ -45,6 +47,19 @@ public class IndicKeyboardService extends InputMethodService implements
                     currentLanguage = preferences.getCurrentLanguage();
                     if (candidateStripView != null) {
                         candidateStripView.post(this::updateStripLanguages);
+                    }
+                } else if (KeyboardPreferences.PREF_NUMBER_ROW.equals(key)
+                        || KeyboardPreferences.PREF_EMOJI_KEY.equals(key)
+                        || KeyboardPreferences.PREF_LANG_KEY.equals(key)
+                        || KeyboardPreferences.PREF_COMMA_KEY.equals(key)
+                        || KeyboardPreferences.PREF_FULLSTOP_KEY.equals(key)) {
+                    if (softKeyboardView != null) {
+                        softKeyboardView.post(() -> softKeyboardView.rebuildLayout());
+                    }
+                } else if (KeyboardPreferences.PREF_SUGGESTION_STRIP.equals(key)) {
+                    if (candidateStripView != null) {
+                        candidateStripView.post(() -> candidateStripView.setVisibility(
+                                preferences.isSuggestionStripEnabled() ? View.VISIBLE : View.GONE));
                     }
                 }
             };
@@ -86,6 +101,7 @@ public class IndicKeyboardService extends InputMethodService implements
         emojiKeyboardView = rootView.findViewById(R.id.emojiKeyboardView);
         keyboardContainer = rootView.findViewById(R.id.keyboardContainer);
 
+        candidateStripView.setVisibility(preferences.isSuggestionStripEnabled() ? View.VISIBLE : View.GONE);
         updateStripLanguages();
         candidateStripView.updateTheme(preferences.getTheme());
         candidateStripView.setOnCandidateClickListener(this);
@@ -116,6 +132,7 @@ public class IndicKeyboardService extends InputMethodService implements
         currentSuggestions = Collections.emptyList();
 
         if (candidateStripView != null) {
+            candidateStripView.setVisibility(preferences.isSuggestionStripEnabled() ? View.VISIBLE : View.GONE);
             candidateStripView.setSuggestions(Collections.emptyList());
             updateStripLanguages();
             candidateStripView.updateTheme(preferences.getTheme());
@@ -242,9 +259,10 @@ public class IndicKeyboardService extends InputMethodService implements
     }
 
     private void handleSpace(InputConnection ic) {
+        long now = System.currentTimeMillis();
         if (composingText.length() > 0) {
             // Commit top candidate or composing text
-            if (!currentSuggestions.isEmpty()) {
+            if (preferences.isAutoCorrectEnabled() && !currentSuggestions.isEmpty()) {
                 String topChoice = currentSuggestions.get(0);
                 ic.commitText(topChoice + " ", 1);
             } else {
@@ -255,8 +273,19 @@ public class IndicKeyboardService extends InputMethodService implements
             if (candidateStripView != null) {
                 candidateStripView.setSuggestions(Collections.emptyList());
             }
+            lastSpaceTime = now;
         } else {
+            if (preferences.isDoubleSpacePeriodEnabled() && (now - lastSpaceTime < 500)) {
+                CharSequence before = ic.getTextBeforeCursor(1, 0);
+                if (before != null && before.length() > 0 && before.charAt(before.length() - 1) == ' ') {
+                    ic.deleteSurroundingText(1, 0);
+                    ic.commitText(". ", 1);
+                    lastSpaceTime = 0;
+                    return;
+                }
+            }
             ic.commitText(" ", 1);
+            lastSpaceTime = now;
         }
     }
 
@@ -294,7 +323,7 @@ public class IndicKeyboardService extends InputMethodService implements
     }
 
     private void updateSuggestions() {
-        if (composingText.length() == 0) {
+        if (!preferences.isWordSuggestionsEnabled() || composingText.length() == 0) {
             currentSuggestions = Collections.emptyList();
             if (candidateStripView != null) {
                 candidateStripView.setSuggestions(Collections.emptyList());

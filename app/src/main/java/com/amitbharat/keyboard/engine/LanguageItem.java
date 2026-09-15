@@ -36,8 +36,10 @@ public class LanguageItem {
 
     public static List<LanguageItem> getAllLanguages() {
         List<LanguageItem> list = new ArrayList<>();
+        // Indian Currency Banknote Languages & Primary Languages
         list.add(new LanguageItem("HN", "Hindi", "हिन्दी"));
         list.add(new LanguageItem("EN", "English", "English"));
+        list.add(new LanguageItem("BHO", "Bhojpuri", "भोजपुरी")); // Widely spoken native
         list.add(new LanguageItem("MR", "Marathi", "मराठी"));
         list.add(new LanguageItem("BN", "Bengali", "বাংলা"));
         list.add(new LanguageItem("TE", "Telugu", "తెలుగు"));
@@ -47,7 +49,17 @@ public class LanguageItem {
         list.add(new LanguageItem("ML", "Malayalam", "മലയാളം"));
         list.add(new LanguageItem("PA", "Punjabi", "ਪੰਜਾਬੀ"));
         list.add(new LanguageItem("OR", "Odia", "ଓଡ଼ିଆ"));
+        list.add(new LanguageItem("AS", "Assamese", "অসমীয়া"));
+        list.add(new LanguageItem("SA", "Sanskrit", "संस्कृतम्"));
+        list.add(new LanguageItem("NE", "Nepali", "नेपाली"));
+        list.add(new LanguageItem("KOK", "Konkani", "कोंकणी"));
         list.add(new LanguageItem("UR", "Urdu", "اردو"));
+        list.add(new LanguageItem("KS", "Kashmiri", "कॉशुर"));
+        list.add(new LanguageItem("MAI", "Maithili", "मैथिली"));
+        list.add(new LanguageItem("RAJ", "Rajasthani", "राजस्थानी"));
+        list.add(new LanguageItem("SD", "Sindhi", "सिंधी"));
+        list.add(new LanguageItem("DOI", "Dogri", "डोगरी"));
+        list.add(new LanguageItem("SAT", "Santali", "संताली"));
         return list;
     }
 

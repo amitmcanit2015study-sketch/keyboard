@@ -119,29 +119,8 @@ public class EmojiKeyboardView extends FrameLayout {
     }
 
     public void updateTheme() {
-        KeyboardPreferences prefs = new KeyboardPreferences(getContext());
-        String theme = prefs.getTheme();
         int bgColor = ContextCompatColor(getContext(), R.color.keyboard_bg);
         int barBgColor = ContextCompatColor(getContext(), R.color.candidate_bar_bg);
-        if (KeyboardPreferences.THEME_LIGHT.equals(theme)) {
-            bgColor = 0xFFECEFF1;
-            barBgColor = 0xFFF1F3F4;
-        } else if (KeyboardPreferences.THEME_DARK.equals(theme)) {
-            bgColor = 0xFF1E222B;
-            barBgColor = 0xFF262A35;
-        } else if (KeyboardPreferences.THEME_BLUE.equals(theme)) {
-            bgColor = 0xFFDCE8F8;
-            barBgColor = 0xFFE6EFFB;
-        } else if (KeyboardPreferences.THEME_PURPLE.equals(theme)) {
-            bgColor = 0xFFEFE7F6;
-            barBgColor = 0xFFF5EEFA;
-        } else if (KeyboardPreferences.THEME_GREEN.equals(theme)) {
-            bgColor = 0xFFE1EFE3;
-            barBgColor = 0xFFE9F5EB;
-        } else if (KeyboardPreferences.THEME_AMOLED.equals(theme)) {
-            bgColor = 0xFF000000;
-            barBgColor = 0xFF121212;
-        }
         setBackgroundColor(bgColor);
         if (bottomBarLayout != null) {
             bottomBarLayout.setBackgroundColor(barBgColor);

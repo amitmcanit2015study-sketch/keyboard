@@ -174,6 +174,39 @@ public class MainActivity extends AppCompatActivity {
     }
 
     private void setupToggles() {
+        // 1. Keys & Layout
+        binding.switchNumberRow.setChecked(preferences.isNumberRowEnabled());
+        binding.switchNumberRow.setOnCheckedChangeListener((btn, isChecked) -> preferences.setNumberRowEnabled(isChecked));
+
+        binding.switchEmojiKey.setChecked(preferences.isEmojiKeyEnabled());
+        binding.switchEmojiKey.setOnCheckedChangeListener((btn, isChecked) -> preferences.setEmojiKeyEnabled(isChecked));
+
+        binding.switchCommaKey.setChecked(preferences.isCommaKeyEnabled());
+        binding.switchCommaKey.setOnCheckedChangeListener((btn, isChecked) -> preferences.setCommaKeyEnabled(isChecked));
+
+        binding.switchFullStopKey.setChecked(preferences.isFullStopKeyEnabled());
+        binding.switchFullStopKey.setOnCheckedChangeListener((btn, isChecked) -> preferences.setFullStopKeyEnabled(isChecked));
+
+        // 2. Corrections & Suggestions
+        binding.switchSuggestionStrip.setChecked(preferences.isSuggestionStripEnabled());
+        binding.switchSuggestionStrip.setOnCheckedChangeListener((btn, isChecked) -> preferences.setSuggestionStripEnabled(isChecked));
+
+        binding.switchAutoCorrect.setChecked(preferences.isAutoCorrectEnabled());
+        binding.switchAutoCorrect.setOnCheckedChangeListener((btn, isChecked) -> preferences.setAutoCorrectEnabled(isChecked));
+
+        binding.switchAutoCap.setChecked(preferences.isAutoCapEnabled());
+        binding.switchAutoCap.setOnCheckedChangeListener((btn, isChecked) -> preferences.setAutoCapEnabled(isChecked));
+
+        binding.switchDoubleSpace.setChecked(preferences.isDoubleSpacePeriodEnabled());
+        binding.switchDoubleSpace.setOnCheckedChangeListener((btn, isChecked) -> preferences.setDoubleSpacePeriodEnabled(isChecked));
+
+        binding.switchWordSuggestions.setChecked(preferences.isWordSuggestionsEnabled());
+        binding.switchWordSuggestions.setOnCheckedChangeListener((btn, isChecked) -> preferences.setWordSuggestionsEnabled(isChecked));
+
+        binding.switchNextWord.setChecked(preferences.isNextWordSuggestionsEnabled());
+        binding.switchNextWord.setOnCheckedChangeListener((btn, isChecked) -> preferences.setNextWordSuggestionsEnabled(isChecked));
+
+        // 3. Key Tap & Feedback
         binding.switchSound.setChecked(preferences.isSoundEnabled());
         binding.switchSound.setOnCheckedChangeListener((btn, isChecked) -> preferences.setSoundEnabled(isChecked));
 
@@ -183,7 +216,5 @@ public class MainActivity extends AppCompatActivity {
         binding.switchPopup.setChecked(preferences.isPopupEnabled());
         binding.switchPopup.setOnCheckedChangeListener((btn, isChecked) -> preferences.setPopupEnabled(isChecked));
 
-        binding.switchAutoCap.setChecked(preferences.isAutoCapEnabled());
-        binding.switchAutoCap.setOnCheckedChangeListener((btn, isChecked) -> preferences.setAutoCapEnabled(isChecked));
     }
 }
