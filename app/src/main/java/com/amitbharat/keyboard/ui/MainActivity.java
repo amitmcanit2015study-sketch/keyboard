@@ -11,7 +11,11 @@ import androidx.appcompat.app.AppCompatActivity;
 import com.amitbharat.keyboard.R;
 import com.amitbharat.keyboard.databinding.ActivityMainBinding;
 import com.amitbharat.keyboard.engine.KeyboardPreferences;
+import com.amitbharat.keyboard.engine.LanguageItem;
 import com.amitbharat.keyboard.utils.LocaleHelper;
+import com.google.android.material.chip.Chip;
+import com.google.android.material.snackbar.Snackbar;
+import java.util.ArrayList;
 import java.util.List;
 
 public class MainActivity extends AppCompatActivity {
@@ -33,47 +37,18 @@ public class MainActivity extends AppCompatActivity {
 
         setupToolbar();
         setupSetupWizard();
-        setupThemePicker();
+        setupLanguageSelection();
         setupToggles();
-        setupTestField();
-    }
-
-    private void setupTestField() {
-        binding.etTestInput.setOnClickListener(v -> {
-            binding.etTestInput.requestFocus();
-            InputMethodManager imm = (InputMethodManager) getSystemService(Context.INPUT_METHOD_SERVICE);
-            if (imm != null) {
-                imm.showSoftInput(binding.etTestInput, InputMethodManager.SHOW_IMPLICIT);
-            }
-        });
-        binding.etTestInput.setOnFocusChangeListener((v, hasFocus) -> {
-            if (hasFocus) {
-                InputMethodManager imm = (InputMethodManager) getSystemService(Context.INPUT_METHOD_SERVICE);
-                if (imm != null) {
-                    imm.showSoftInput(binding.etTestInput, InputMethodManager.SHOW_IMPLICIT);
-                }
-            }
-        });
     }
 
     @Override
     protected void onResume() {
         super.onResume();
         updateKeyboardStatus();
-        binding.etTestInput.postDelayed(() -> {
-            binding.etTestInput.requestFocus();
-            InputMethodManager imm = (InputMethodManager) getSystemService(Context.INPUT_METHOD_SERVICE);
-            if (imm != null) {
-                imm.showSoftInput(binding.etTestInput, InputMethodManager.SHOW_FORCED);
-            }
-        }, 300);
     }
 
     private void setupToolbar() {
         binding.btnAbout.setOnClickListener(v -> {
-            startActivity(new Intent(this, AboutActivity.class));
-        });
-        binding.cardAboutBanner.setOnClickListener(v -> {
             startActivity(new Intent(this, AboutActivity.class));
         });
     }
@@ -140,44 +115,62 @@ public class MainActivity extends AppCompatActivity {
         return defaultIme != null && defaultIme.contains(getPackageName());
     }
 
-    private void setupThemePicker() {
-        String currentTheme = preferences.getTheme();
-        int checkedId = R.id.btnThemeSystem;
-        if (KeyboardPreferences.THEME_LIGHT.equals(currentTheme)) {
-            checkedId = R.id.btnThemeLight;
-        } else if (KeyboardPreferences.THEME_DARK.equals(currentTheme)) {
-            checkedId = R.id.btnThemeDark;
-        } else if (KeyboardPreferences.THEME_BLUE.equals(currentTheme)) {
-            checkedId = R.id.btnThemeBlue;
-        } else if (KeyboardPreferences.THEME_PURPLE.equals(currentTheme)) {
-            checkedId = R.id.btnThemePurple;
-        } else if (KeyboardPreferences.THEME_GREEN.equals(currentTheme)) {
-            checkedId = R.id.btnThemeGreen;
-        } else if (KeyboardPreferences.THEME_AMOLED.equals(currentTheme)) {
-            checkedId = R.id.btnThemeAmoled;
-        }
+    private void setupLanguageSelection() {
+        List<LanguageItem> allLangs = LanguageItem.getAllLanguages();
+        List<String> selected = new ArrayList<>(preferences.getSelectedLanguages());
 
-        binding.toggleThemeGroup.check(checkedId);
+        updateLanguageCountBadge(selected.size());
+        binding.chipGroupLanguages.removeAllViews();
 
-        binding.toggleThemeGroup.addOnButtonCheckedListener((group, checkedButtonId, isChecked) -> {
-            if (isChecked) {
-                String chosenTheme = KeyboardPreferences.THEME_SYSTEM;
-                if (checkedButtonId == R.id.btnThemeLight) {
-                    chosenTheme = KeyboardPreferences.THEME_LIGHT;
-                } else if (checkedButtonId == R.id.btnThemeDark) {
-                    chosenTheme = KeyboardPreferences.THEME_DARK;
-                } else if (checkedButtonId == R.id.btnThemeBlue) {
-                    chosenTheme = KeyboardPreferences.THEME_BLUE;
-                } else if (checkedButtonId == R.id.btnThemePurple) {
-                    chosenTheme = KeyboardPreferences.THEME_PURPLE;
-                } else if (checkedButtonId == R.id.btnThemeGreen) {
-                    chosenTheme = KeyboardPreferences.THEME_GREEN;
-                } else if (checkedButtonId == R.id.btnThemeAmoled) {
-                    chosenTheme = KeyboardPreferences.THEME_AMOLED;
+        for (LanguageItem lang : allLangs) {
+            Chip chip = new Chip(this);
+            chip.setText(lang.getDisplayName());
+            chip.setCheckable(true);
+            chip.setClickable(true);
+            boolean isChecked = selected.contains(lang.getCode());
+            chip.setChecked(isChecked);
+
+            chip.setOnCheckedChangeListener((buttonView, checked) -> {
+                List<String> currentSelected = new ArrayList<>(preferences.getSelectedLanguages());
+                if (checked) {
+                    if (currentSelected.size() >= 2) {
+                        chip.setChecked(false);
+                        Snackbar.make(
+                                binding.getRoot(),
+                                "Maximum 2 languages can be active at a time",
+                                Snackbar.LENGTH_SHORT
+                        ).show();
+                        return;
+                    }
+                    if (!currentSelected.contains(lang.getCode())) {
+                        currentSelected.add(lang.getCode());
+                        preferences.setSelectedLanguages(currentSelected);
+                        updateLanguageCountBadge(currentSelected.size());
+                    }
+                } else {
+                    if (currentSelected.size() <= 1) {
+                        chip.setChecked(true);
+                        Snackbar.make(
+                                binding.getRoot(),
+                                "At least 1 language must remain active",
+                                Snackbar.LENGTH_SHORT
+                        ).show();
+                        return;
+                    }
+                    currentSelected.remove(lang.getCode());
+                    preferences.setSelectedLanguages(currentSelected);
+                    updateLanguageCountBadge(currentSelected.size());
                 }
-                preferences.setTheme(chosenTheme);
-            }
-        });
+            });
+
+            binding.chipGroupLanguages.addView(chip);
+        }
+    }
+
+    private void updateLanguageCountBadge(int count) {
+        if (binding.tvLanguageCountBadge != null) {
+            binding.tvLanguageCountBadge.setText(count + "/2 selected");
+        }
     }
 
     private void setupToggles() {

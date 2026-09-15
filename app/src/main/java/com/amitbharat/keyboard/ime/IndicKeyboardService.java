@@ -41,6 +41,11 @@ public class IndicKeyboardService extends InputMethodService implements
                     if (candidateStripView != null) {
                         candidateStripView.post(() -> candidateStripView.updateTheme(preferences.getTheme()));
                     }
+                } else if (KeyboardPreferences.PREF_SELECTED_LANGS.equals(key) || KeyboardPreferences.PREF_CURRENT_LANG.equals(key)) {
+                    currentLanguage = preferences.getCurrentLanguage();
+                    if (candidateStripView != null) {
+                        candidateStripView.post(this::updateStripLanguages);
+                    }
                 }
             };
 
@@ -70,8 +75,9 @@ public class IndicKeyboardService extends InputMethodService implements
     @Override
     public View onCreateInputView() {
         android.util.Log.d("IndicKeyboard", "onCreateInputView called");
-        androidx.appcompat.view.ContextThemeWrapper themedContext =
+        android.content.Context themedContext =
                 new androidx.appcompat.view.ContextThemeWrapper(this, R.style.Theme_IndicKeyboard);
+        themedContext = com.google.android.material.color.DynamicColors.wrapContextIfAvailable(themedContext);
         android.view.LayoutInflater inflater = android.view.LayoutInflater.from(themedContext);
         rootView = inflater.inflate(R.layout.keyboard_root_view, null);
 
@@ -80,11 +86,11 @@ public class IndicKeyboardService extends InputMethodService implements
         emojiKeyboardView = rootView.findViewById(R.id.emojiKeyboardView);
         keyboardContainer = rootView.findViewById(R.id.keyboardContainer);
 
-        candidateStripView.setLanguage(currentLanguage);
+        updateStripLanguages();
         candidateStripView.updateTheme(preferences.getTheme());
         candidateStripView.setOnCandidateClickListener(this);
 
-        // 1. Top-left language toggle listener (HN / EN)
+        // 1. Top-left language toggle listener
         candidateStripView.setOnLanguageToggleListener(() -> {
             toggleLanguage();
         });
@@ -111,7 +117,7 @@ public class IndicKeyboardService extends InputMethodService implements
 
         if (candidateStripView != null) {
             candidateStripView.setSuggestions(Collections.emptyList());
-            candidateStripView.setLanguage(currentLanguage);
+            updateStripLanguages();
             candidateStripView.updateTheme(preferences.getTheme());
         }
 
@@ -153,17 +159,17 @@ public class IndicKeyboardService extends InputMethodService implements
         showSoftKeyboard();
     }
 
-    private void toggleLanguage() {
-        if (KeyboardPreferences.LANG_HINDI.equals(currentLanguage)) {
-            currentLanguage = KeyboardPreferences.LANG_ENGLISH;
-        } else {
-            currentLanguage = KeyboardPreferences.LANG_HINDI;
-        }
-        preferences.setCurrentLanguage(currentLanguage);
+    private void updateStripLanguages() {
         if (candidateStripView != null) {
-            candidateStripView.setLanguage(currentLanguage);
+            String active = preferences.getCurrentLanguage();
+            String alt = preferences.getAltLanguage();
+            candidateStripView.setLanguages(active, alt);
         }
-        // Update suggestions if text is being composed
+    }
+
+    private void toggleLanguage() {
+        currentLanguage = preferences.toggleLanguage();
+        updateStripLanguages();
         updateSuggestions();
     }
 
@@ -297,13 +303,7 @@ public class IndicKeyboardService extends InputMethodService implements
         }
 
         String query = composingText.toString();
-        if (KeyboardPreferences.LANG_HINDI.equals(currentLanguage)) {
-            // Hinglish -> Hindi Transliteration suggestions
-            currentSuggestions = HinglishTransliterator.getSuggestions(query);
-        } else {
-            // English word autocomplete & spell suggestions
-            currentSuggestions = EnglishDictionary.getSuggestions(query);
-        }
+        currentSuggestions = com.amitbharat.keyboard.engine.IndicTransliterator.getSuggestions(currentLanguage, query);
 
         if (candidateStripView != null) {
             candidateStripView.setSuggestions(currentSuggestions);

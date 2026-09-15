@@ -39,9 +39,9 @@
     <color name="suggestion_chip_active_bg">#E0EAFF</color>
     <color name="suggestion_chip_active_text">#0D6EFD</color>
 
-    <color name="lang_pill_bg">#0D6EFD</color>
-    <color name="lang_pill_text">#FFFFFF</color>
-    <color name="lang_pill_border">#0A58CA</color>
+    <color name="lang_pill_bg">@color/md_theme_primaryContainer</color>
+    <color name="lang_pill_text">@color/md_theme_onPrimaryContainer</color>
+    <color name="lang_pill_border">@color/md_theme_primaryContainer</color>
 
     <color name="lang_pill_inactive_bg">#E2E8F0</color>
     <color name="lang_pill_inactive_text">#475569</color>

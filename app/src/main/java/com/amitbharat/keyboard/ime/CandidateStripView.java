@@ -67,14 +67,31 @@ public class CandidateStripView extends FrameLayout {
         });
     }
 
-    public void setLanguage(String lang) {
-        if (KeyboardPreferences.LANG_HINDI.equals(lang)) {
-            tvActiveLang.setText("HN");
-            tvAltLang.setText("EN");
-        } else {
-            tvActiveLang.setText("EN");
-            tvAltLang.setText("HN");
+    public void setLanguages(String activeLang, String altLang) {
+        if (tvActiveLang != null) {
+            tvActiveLang.setText(activeLang != null ? activeLang.toUpperCase(java.util.Locale.ROOT) : "");
         }
+        TextView tvDivider = findViewById(R.id.tvLangDivider);
+        if (altLang != null && !altLang.isEmpty()) {
+            if (tvAltLang != null) {
+                tvAltLang.setText(altLang.toUpperCase(java.util.Locale.ROOT));
+                tvAltLang.setVisibility(View.VISIBLE);
+            }
+            if (tvDivider != null) {
+                tvDivider.setVisibility(View.VISIBLE);
+            }
+        } else {
+            if (tvAltLang != null) {
+                tvAltLang.setVisibility(View.GONE);
+            }
+            if (tvDivider != null) {
+                tvDivider.setVisibility(View.GONE);
+            }
+        }
+    }
+
+    public void setLanguage(String lang) {
+        setLanguages(lang, null);
     }
 
     public void setOnLanguageToggleListener(Runnable listener) {
@@ -89,41 +106,51 @@ public class CandidateStripView extends FrameLayout {
         this.settingsClickListener = listener;
     }
 
-    private int currentAccentColor = 0xFF0D6EFD;
+    private int currentAccentColor = 0xFF283C5A;
+    private int currentAccentTextColor = 0xFFD6E4FF;
 
     public void updateTheme(String theme) {
         Context ctx = getContext();
-        if (KeyboardPreferences.THEME_LIGHT.equals(theme)) {
-            currentAccentColor = 0xFF0D6EFD;
-        } else if (KeyboardPreferences.THEME_DARK.equals(theme)) {
-            currentAccentColor = 0xFF3B82F6;
-        } else if (KeyboardPreferences.THEME_BLUE.equals(theme)) {
-            currentAccentColor = 0xFF1976D2;
-        } else if (KeyboardPreferences.THEME_PURPLE.equals(theme)) {
-            currentAccentColor = 0xFF7C3AED;
-        } else if (KeyboardPreferences.THEME_GREEN.equals(theme)) {
-            currentAccentColor = 0xFF059669;
-        } else if (KeyboardPreferences.THEME_AMOLED.equals(theme)) {
-            currentAccentColor = 0xFF2563EB;
+        TypedValue tv = new TypedValue();
+
+        int accentBg;
+        if (ctx.getTheme().resolveAttribute(com.google.android.material.R.attr.colorPrimaryContainer, tv, true)) {
+            accentBg = tv.data;
+        } else if (ctx.getTheme().resolveAttribute(com.google.android.material.R.attr.colorPrimary, tv, true)) {
+            accentBg = tv.data;
         } else {
-            currentAccentColor = ContextCompat.getColor(ctx, R.color.md_theme_primary);
+            accentBg = ContextCompat.getColor(ctx, R.color.md_theme_primaryContainer);
         }
+
+        int accentText;
+        if (ctx.getTheme().resolveAttribute(com.google.android.material.R.attr.colorOnPrimaryContainer, tv, true)) {
+            accentText = tv.data;
+        } else if (ctx.getTheme().resolveAttribute(com.google.android.material.R.attr.colorOnPrimary, tv, true)) {
+            accentText = tv.data;
+        } else {
+            accentText = ContextCompat.getColor(ctx, R.color.md_theme_onPrimaryContainer);
+        }
+
+        currentAccentColor = accentBg;
+        currentAccentTextColor = accentText;
 
         android.graphics.drawable.GradientDrawable pillBg = new android.graphics.drawable.GradientDrawable();
         pillBg.setShape(android.graphics.drawable.GradientDrawable.RECTANGLE);
         pillBg.setCornerRadius(TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP, 16, ctx.getResources().getDisplayMetrics()));
-        pillBg.setColor(currentAccentColor);
+        pillBg.setColor(accentBg);
         btnLanguageToggle.setBackground(pillBg);
 
-        tvActiveLang.setTextColor(0xFFFFFFFF);
-        tvAltLang.setTextColor(0xCCFFFFFF);
+        tvActiveLang.setTextColor(accentText);
+        tvAltLang.setTextColor(accentText);
+        tvAltLang.setAlpha(0.75f);
         android.widget.ImageView ivGlobe = findViewById(R.id.ivGlobeIcon);
         if (ivGlobe != null) {
-            ivGlobe.setColorFilter(0xFFFFFFFF);
+            ivGlobe.setColorFilter(accentText);
         }
         TextView tvDivider = findViewById(R.id.tvLangDivider);
         if (tvDivider != null) {
-            tvDivider.setTextColor(0xAAFFFFFF);
+            tvDivider.setTextColor(accentText);
+            tvDivider.setAlpha(0.6f);
         }
     }
 

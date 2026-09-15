@@ -50,6 +50,7 @@ public class SoftKeyboardView extends View {
     private int colorKeyBgNormal;
     private int colorKeyBgAction;
     private int colorKeyBgAccent;
+    private int colorKeyTextAccent;
     private int colorKeyText;
     private int colorKeyHint;
     private int colorKeyBorder;
@@ -127,53 +128,26 @@ public class SoftKeyboardView extends View {
 
         colorKeyBgNormal = ContextCompat.getColor(ctx, R.color.key_bg_normal);
         colorKeyBgAction = ContextCompat.getColor(ctx, R.color.key_bg_action);
-        colorKeyBgAccent = ContextCompat.getColor(ctx, R.color.md_theme_primary);
         colorKeyText = ContextCompat.getColor(ctx, R.color.key_text_color);
         colorKeyHint = ContextCompat.getColor(ctx, R.color.key_hint_color);
         colorKeyBorder = ContextCompat.getColor(ctx, R.color.key_border);
 
-        if (KeyboardPreferences.THEME_LIGHT.equals(theme)) {
-            colorKeyBgNormal = 0xFFFFFFFF;
-            colorKeyBgAction = 0xFFD7DCE0;
-            colorKeyText = 0xFF1F2937;
-            colorKeyHint = 0xFF9CA3AF;
-            colorKeyBorder = 0xFFCBD5E1;
-            colorKeyBgAccent = 0xFF0D6EFD;
-        } else if (KeyboardPreferences.THEME_DARK.equals(theme)) {
-            colorKeyBgNormal = 0xFF2A2E39;
-            colorKeyBgAction = 0xFF21252E;
-            colorKeyText = 0xFFF1F5F9;
-            colorKeyHint = 0xFF64748B;
-            colorKeyBorder = 0xFF383D4A;
-            colorKeyBgAccent = 0xFF3B82F6;
-        } else if (KeyboardPreferences.THEME_BLUE.equals(theme)) {
-            colorKeyBgNormal = 0xFFEBF3FE;
-            colorKeyBgAction = 0xFFD2E3FC;
-            colorKeyText = 0xFF0A3871;
-            colorKeyHint = 0xFF6082B6;
-            colorKeyBorder = 0xFFADC8F0;
-            colorKeyBgAccent = 0xFF1976D2;
-        } else if (KeyboardPreferences.THEME_PURPLE.equals(theme)) {
-            colorKeyBgNormal = 0xFFF7F2FA;
-            colorKeyBgAction = 0xFFECE6F0;
-            colorKeyText = 0xFF381E72;
-            colorKeyHint = 0xFF7D5260;
-            colorKeyBorder = 0xFFD0BCFF;
-            colorKeyBgAccent = 0xFF7C3AED;
-        } else if (KeyboardPreferences.THEME_GREEN.equals(theme)) {
-            colorKeyBgNormal = 0xFFEBF7ED;
-            colorKeyBgAction = 0xFFD5E8D4;
-            colorKeyText = 0xFF144D20;
-            colorKeyHint = 0xFF588157;
-            colorKeyBorder = 0xFFB7E4C7;
-            colorKeyBgAccent = 0xFF059669;
-        } else if (KeyboardPreferences.THEME_AMOLED.equals(theme)) {
-            colorKeyBgNormal = 0xFF121212;
-            colorKeyBgAction = 0xFF000000;
-            colorKeyText = 0xFFFFFFFF;
-            colorKeyHint = 0xFF888888;
-            colorKeyBorder = 0xFF222222;
-            colorKeyBgAccent = 0xFF2563EB;
+        // Resolve accent colors dynamically to match host device
+        android.util.TypedValue tv = new android.util.TypedValue();
+        if (ctx.getTheme().resolveAttribute(com.google.android.material.R.attr.colorPrimaryContainer, tv, true)) {
+            colorKeyBgAccent = tv.data;
+        } else if (ctx.getTheme().resolveAttribute(com.google.android.material.R.attr.colorPrimary, tv, true)) {
+            colorKeyBgAccent = tv.data;
+        } else {
+            colorKeyBgAccent = ContextCompat.getColor(ctx, R.color.md_theme_primaryContainer);
+        }
+
+        if (ctx.getTheme().resolveAttribute(com.google.android.material.R.attr.colorOnPrimaryContainer, tv, true)) {
+            colorKeyTextAccent = tv.data;
+        } else if (ctx.getTheme().resolveAttribute(com.google.android.material.R.attr.colorOnPrimary, tv, true)) {
+            colorKeyTextAccent = tv.data;
+        } else {
+            colorKeyTextAccent = ContextCompat.getColor(ctx, R.color.md_theme_onPrimaryContainer);
         }
 
         if (paintKeyText != null) {
@@ -314,7 +288,7 @@ public class SoftKeyboardView extends View {
                 if (key.iconResId != 0) {
                     Drawable icon = ContextCompat.getDrawable(getContext(), key.iconResId);
                     if (icon != null) {
-                        int iconColor = key.isAccent ? 0xFFFFFFFF : colorKeyText;
+                        int iconColor = key.isAccent ? colorKeyTextAccent : colorKeyText;
                         icon.setTint(iconColor);
                         int iconSize = dpToPx(22);
                         int cx = (int) b.centerX();
@@ -324,7 +298,7 @@ public class SoftKeyboardView extends View {
                     }
                 } else {
                     // Draw label text
-                    int textColor = key.isAccent ? 0xFFFFFFFF : colorKeyText;
+                    int textColor = key.isAccent ? colorKeyTextAccent : colorKeyText;
                     paintKeyText.setColor(textColor);
                     if (key.code == KeyboardKey.CODE_SPACE) {
                         paintKeyText.setTextSize(dpToPx(14));
