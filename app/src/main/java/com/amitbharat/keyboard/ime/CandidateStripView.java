@@ -156,10 +156,9 @@ public class CandidateStripView extends FrameLayout {
             tvDivider.setAlpha(0.75f);
         }
 
-        android.widget.ImageButton ibSettings = findViewById(R.id.ibSettings);
-        if (ibSettings != null) {
+        if (btnQuickSettings != null) {
             boolean isNight = (ctx.getResources().getConfiguration().uiMode & android.content.res.Configuration.UI_MODE_NIGHT_MASK) == android.content.res.Configuration.UI_MODE_NIGHT_YES;
-            ibSettings.setColorFilter(isNight ? 0xFFCBD5E1 : 0xFF4B5563);
+            btnQuickSettings.setColorFilter(isNight ? 0xFFCBD5E1 : 0xFF4B5563);
         }
     }
 
