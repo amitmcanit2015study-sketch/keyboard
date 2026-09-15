@@ -375,6 +375,17 @@ public class IndicKeyboardService extends InputMethodService implements
     }
 
     @Override
+    public void onGifSelected(String title, String content) {
+        InputConnection ic = getCurrentInputConnection();
+        if (ic != null) {
+            if (composingText.length() > 0) {
+                commitComposingText(ic, false);
+            }
+            ic.commitText(content + " ", 1);
+        }
+    }
+
+    @Override
     public void onBackToAlpha() {
         showSoftKeyboard();
     }

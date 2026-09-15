@@ -36,6 +36,7 @@ public class IndicTransliterator {
         initSindhiDict();
         initDogriDict();
         initSantaliDict();
+        initUrduDict();
     }
 
     private static void addWord(String lang, String roman, String... candidates) {
@@ -318,6 +319,158 @@ public class IndicTransliterator {
         addWord(L, "khana", "کھانا");
     }
 
+    private static void initBhojpuriDict() {
+        String L = "BHO";
+        addWord(L, "pranam", "प्रणाम");
+        addWord(L, "kaisan", "कइसन");
+        addWord(L, "kaise", "कइसे");
+        addWord(L, "baani", "बानी");
+        addWord(L, "baate", "बाटे");
+        addWord(L, "baat", "बात");
+        addWord(L, "hauwa", "हउवा");
+        addWord(L, "ka", "का");
+        addWord(L, "chala", "चला");
+        addWord(L, "theek", "ठीक");
+        addWord(L, "bhaiya", "भैया");
+        addWord(L, "hamaar", "हमार");
+        addWord(L, "tohar", "तोहार");
+        addWord(L, "raua", "रउआ");
+        addWord(L, "ego", "एगो");
+        addWord(L, "babua", "बबुआ");
+        addWord(L, "kahiya", "कहिया");
+        addWord(L, "katna", "कतना");
+        addWord(L, "bhojpuri", "भोजपुरी");
+        addWord(L, "khana", "खाना");
+        addWord(L, "pani", "पानी");
+        addWord(L, "ghar", "घर");
+        addWord(L, "naam", "नाम");
+    }
+
+    private static void initSanskritDict() {
+        String L = "SA";
+        addWord(L, "namaste", "नमस्ते");
+        addWord(L, "namaskara", "नमस्कारः");
+        addWord(L, "dhanyavada", "धन्यवादः");
+        addWord(L, "aham", "अहम्");
+        addWord(L, "tvam", "त्वम्");
+        addWord(L, "asti", "अस्ति");
+        addWord(L, "shanti", "शान्तिः");
+        addWord(L, "om", "ॐ");
+        addWord(L, "suprabhatam", "सुप्रभातम्");
+        addWord(L, "shubham", "शुभम्");
+        addWord(L, "sanskritam", "संस्कृतम्");
+        addWord(L, "katham", "कथम्");
+        addWord(L, "bhavatah", "भवतः");
+        addWord(L, "bhavatya", "भवत्याः");
+    }
+
+    private static void initNepaliDict() {
+        String L = "NE";
+        addWord(L, "namaste", "नमस्ते");
+        addWord(L, "kasto", "कस्तो");
+        addWord(L, "cha", "छ");
+        addWord(L, "dhanyabad", "धन्यवाद");
+        addWord(L, "ma", "म");
+        addWord(L, "timi", "तिमी");
+        addWord(L, "tapai", "तपाईं");
+        addWord(L, "ramro", "राम्रो");
+        addWord(L, "nepali", "नेपाली");
+        addWord(L, "hajur", "हजुर");
+        addWord(L, "kaha", "कहाँ");
+    }
+
+    private static void initKonkaniDict() {
+        String L = "KOK";
+        addWord(L, "koso", "कसो");
+        addWord(L, "asa", "आसा");
+        addWord(L, "dev", "देव");
+        addWord(L, "boren", "बरें");
+        addWord(L, "korun", "करून");
+        addWord(L, "tuka", "तुका");
+        addWord(L, "maka", "म्हाका");
+        addWord(L, "konkani", "कोंकणी");
+        addWord(L, "namaskar", "नमस्कार");
+    }
+
+    private static void initAssameseDict() {
+        String L = "AS";
+        addWord(L, "nomoskar", "নমস্কাৰ");
+        addWord(L, "dhonyobad", "ধন্যবাদ");
+        addWord(L, "kene", "কেনেকৈ");
+        addWord(L, "asa", "আছা");
+        addWord(L, "bhal", "ভাল");
+        addWord(L, "moi", "মই");
+        addWord(L, "tumi", "তুমি");
+        addWord(L, "apuni", "আপুনি");
+        addWord(L, "axomiya", "অসমীয়া");
+        addWord(L, "ki", "কি");
+    }
+
+    private static void initMaithiliDict() {
+        String L = "MAI";
+        addWord(L, "pranam", "प्रणाम");
+        addWord(L, "nik", "नीक");
+        addWord(L, "achhi", "अछि");
+        addWord(L, "ki", "की");
+        addWord(L, "bhel", "भेल");
+        addWord(L, "ham", "हम");
+        addWord(L, "ahan", "अहाँ");
+        addWord(L, "maithili", "मैथिली");
+    }
+
+    private static void initRajasthaniDict() {
+        String L = "RAJ";
+        addWord(L, "khamma", "खम्मा");
+        addWord(L, "ghani", "घणी");
+        addWord(L, "padharo", "पधारो");
+        addWord(L, "mharo", "म्हारो");
+        addWord(L, "tharo", "थारो");
+        addWord(L, "rajasthani", "राजस्थानी");
+        addWord(L, "kain", "कांई");
+        addWord(L, "hukum", "हुकम");
+    }
+
+    private static void initKashmiriDict() {
+        String L = "KS";
+        addWord(L, "kya", "کیا");
+        addWord(L, "chhu", "چھُ");
+        addWord(L, "varay", "وارَی");
+        addWord(L, "shukriya", "شکریہ");
+        addWord(L, "koshur", "کٲشُر");
+        addWord(L, "kashmiri", "कॉशुर");
+    }
+
+    private static void initSindhiDict() {
+        String L = "SD";
+        addWord(L, "kian", "ڪيئن");
+        addWord(L, "ahiyo", "آهيو");
+        addWord(L, "theek", "ٺيڪ");
+        addWord(L, "shukriya", "مهرباني");
+        addWord(L, "sindhi", "سنڌي");
+    }
+
+    private static void initDogriDict() {
+        String L = "DOI";
+        addWord(L, "ke", "के");
+        addWord(L, "aundey", "औंदे");
+        addWord(L, "theek", "ठीक");
+        addWord(L, "dogri", "डोगरी");
+    }
+
+    private static void initSantaliDict() {
+        String L = "SAT";
+        addWord(L, "johar", "ᱡᱚᱦᱟᱨ");
+        addWord(L, "adi", "ᱟᱹᱰᱤ");
+        addWord(L, "napay", "ᱱᱟᱯᱟᱭ");
+        addWord(L, "santali", "ᱥᱟᱱᱛᱟᱲᱤ");
+    }
+
+    private static boolean isDevanagari(String lang) {
+        return "MR".equalsIgnoreCase(lang) || "BHO".equalsIgnoreCase(lang) || "SA".equalsIgnoreCase(lang)
+                || "NE".equalsIgnoreCase(lang) || "KOK".equalsIgnoreCase(lang) || "MAI".equalsIgnoreCase(lang)
+                || "RAJ".equalsIgnoreCase(lang) || "DOI".equalsIgnoreCase(lang);
+    }
+
     public static List<String> getSuggestions(String lang, String query) {
         if (query == null || query.trim().isEmpty()) {
             return Collections.emptyList();
@@ -346,15 +499,15 @@ public class IndicTransliterator {
             }
         }
 
-        // For Marathi, check Hindi dict as well since it shares Devanagari
-        if ("MR".equalsIgnoreCase(lang)) {
+        // For Devanagari languages, include Devanagari suggestions
+        if (isDevanagari(lang)) {
             List<String> devanagariSuggestions = HinglishTransliterator.getSuggestions(q);
             for (String s : devanagariSuggestions) {
                 if (!results.contains(s)) {
                     results.add(s);
                 }
             }
-        } else if (!"UR".equalsIgnoreCase(lang)) {
+        } else if (!"UR".equalsIgnoreCase(lang) && !"KS".equalsIgnoreCase(lang) && !"SD".equalsIgnoreCase(lang)) {
             // General Brahmic script transliteration via Devanagari offset conversion
             List<String> hindiBase = HinglishTransliterator.getSuggestions(q);
             for (String hWord : hindiBase) {
