@@ -440,10 +440,14 @@ public class IndicKeyboardService extends InputMethodService implements
 
     private void showSoftKeyboard() {
         if (emojiKeyboardView != null) emojiKeyboardView.setVisibility(View.GONE);
+        if (candidateStripView != null) {
+            candidateStripView.setVisibility(preferences.isSuggestionStripEnabled() ? View.VISIBLE : View.GONE);
+        }
         if (softKeyboardView != null) softKeyboardView.setVisibility(View.VISIBLE);
     }
 
     private void showEmojiKeyboard() {
+        if (candidateStripView != null) candidateStripView.setVisibility(View.GONE);
         if (softKeyboardView != null) softKeyboardView.setVisibility(View.GONE);
         if (emojiKeyboardView != null) {
             emojiKeyboardView.updateTheme();
