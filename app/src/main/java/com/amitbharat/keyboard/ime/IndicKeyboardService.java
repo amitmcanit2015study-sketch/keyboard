@@ -10,6 +10,7 @@ import android.speech.RecognizerIntent;
 import android.speech.SpeechRecognizer;
 import android.text.InputType;
 import android.view.View;
+import android.view.ViewGroup;
 import android.view.inputmethod.EditorInfo;
 import android.view.inputmethod.InputConnection;
 import android.widget.FrameLayout;
@@ -43,6 +44,7 @@ public class IndicKeyboardService extends InputMethodService implements
     private long lastSpaceTime = 0;
     private SpeechRecognizer speechRecognizer;
     private boolean isVoiceListening = false;
+    private boolean isPasswordField = false;
 
     private android.content.SharedPreferences sharedPreferences;
     private final android.content.SharedPreferences.OnSharedPreferenceChangeListener prefListener =
@@ -152,8 +154,19 @@ public class IndicKeyboardService extends InputMethodService implements
         composingText.setLength(0);
         currentSuggestions = Collections.emptyList();
 
+        isPasswordField = false;
+        if (info != null) {
+            int variation = info.inputType & InputType.TYPE_MASK_VARIATION;
+            if (variation == InputType.TYPE_TEXT_VARIATION_PASSWORD
+                    || variation == InputType.TYPE_TEXT_VARIATION_VISIBLE_PASSWORD
+                    || variation == InputType.TYPE_TEXT_VARIATION_WEB_PASSWORD
+                    || variation == InputType.TYPE_NUMBER_VARIATION_PASSWORD) {
+                isPasswordField = true;
+            }
+        }
+
         if (candidateStripView != null) {
-            candidateStripView.setVisibility(preferences.isSuggestionStripEnabled() ? View.VISIBLE : View.GONE);
+            candidateStripView.setVisibility((!isPasswordField && preferences.isSuggestionStripEnabled()) ? View.VISIBLE : View.GONE);
             candidateStripView.setSuggestions(Collections.emptyList());
             updateStripLanguages();
             candidateStripView.updateTheme(preferences.getTheme());
@@ -247,6 +260,11 @@ public class IndicKeyboardService extends InputMethodService implements
     }
 
     private void handleCharacter(char ch, InputConnection ic) {
+        if (isPasswordField) {
+            ic.commitText(String.valueOf(ch), 1);
+            return;
+        }
+
         // If it's an alphabetical letter, compose for transliteration or spell suggestion
         if (Character.isLetter(ch)) {
             composingText.append(ch);
@@ -363,7 +381,7 @@ public class IndicKeyboardService extends InputMethodService implements
     }
 
     private void updateSuggestions() {
-        if (!preferences.isWordSuggestionsEnabled() || composingText.length() == 0) {
+        if (isPasswordField || !preferences.isWordSuggestionsEnabled() || composingText.length() == 0) {
             currentSuggestions = Collections.emptyList();
             if (candidateStripView != null) {
                 candidateStripView.setSuggestions(Collections.emptyList());
@@ -438,10 +456,22 @@ public class IndicKeyboardService extends InputMethodService implements
         }
     }
 
+    private int dpToPx(int dp) {
+        return (int) (dp * getResources().getDisplayMetrics().density + 0.5f);
+    }
+
     private void showSoftKeyboard() {
         if (emojiKeyboardView != null) emojiKeyboardView.setVisibility(View.GONE);
+        boolean showStrip = preferences.isSuggestionStripEnabled();
         if (candidateStripView != null) {
-            candidateStripView.setVisibility(preferences.isSuggestionStripEnabled() ? View.VISIBLE : View.GONE);
+            candidateStripView.setVisibility(showStrip ? View.VISIBLE : View.GONE);
+        }
+        if (keyboardContainer != null) {
+            ViewGroup.LayoutParams lp = keyboardContainer.getLayoutParams();
+            if (lp != null) {
+                lp.height = dpToPx(showStrip ? 276 : 320);
+                keyboardContainer.setLayoutParams(lp);
+            }
         }
         if (softKeyboardView != null) softKeyboardView.setVisibility(View.VISIBLE);
     }
@@ -449,6 +479,13 @@ public class IndicKeyboardService extends InputMethodService implements
     private void showEmojiKeyboard() {
         if (candidateStripView != null) candidateStripView.setVisibility(View.GONE);
         if (softKeyboardView != null) softKeyboardView.setVisibility(View.GONE);
+        if (keyboardContainer != null) {
+            ViewGroup.LayoutParams lp = keyboardContainer.getLayoutParams();
+            if (lp != null) {
+                lp.height = dpToPx(320);
+                keyboardContainer.setLayoutParams(lp);
+            }
+        }
         if (emojiKeyboardView != null) {
             emojiKeyboardView.updateTheme();
             emojiKeyboardView.setVisibility(View.VISIBLE);
@@ -456,6 +493,11 @@ public class IndicKeyboardService extends InputMethodService implements
     }
 
     private void handleVoiceInput() {
+        if (isPasswordField) {
+            android.widget.Toast.makeText(this, "Voice typing is disabled in password fields", android.widget.Toast.LENGTH_SHORT).show();
+            return;
+        }
+
         if (ContextCompat.checkSelfPermission(this, Manifest.permission.RECORD_AUDIO)
                 != PackageManager.PERMISSION_GRANTED) {
             Intent intent = new Intent(this, VoicePermissionActivity.class);

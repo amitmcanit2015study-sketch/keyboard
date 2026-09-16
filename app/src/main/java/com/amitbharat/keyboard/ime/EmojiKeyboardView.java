@@ -2,15 +2,13 @@ package com.amitbharat.keyboard.ime;
 
 import android.content.Context;
 import android.content.SharedPreferences;
-import android.text.Editable;
-import android.text.TextWatcher;
+import android.graphics.drawable.GradientDrawable;
 import android.util.AttributeSet;
 import android.util.TypedValue;
 import android.view.Gravity;
 import android.view.HapticFeedbackConstants;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.EditText;
 import android.widget.FrameLayout;
 import android.widget.HorizontalScrollView;
 import android.widget.ImageButton;
@@ -36,25 +34,38 @@ public class EmojiKeyboardView extends FrameLayout {
     }
 
     private static final String PREF_RECENT_EMOJIS = "pref_recent_emojis_list";
-    private static final int TAB_EMOJI = 0;
-    private static final int TAB_CLIPS = 1;
-    private static final int TAB_GIF = 2;
-    private static final int TAB_KAOMOJI = 3;
+    public static final int TAB_EMOJI = 0;
+    public static final int TAB_CLIPS = 1;
+    public static final int TAB_GIF = 2;
+    public static final int TAB_KAOMOJI = 3;
 
     private int currentTab = TAB_EMOJI;
     private String currentCategory = EmojiData.CAT_SMILEYS;
-    private String currentMediaFilter = "All";
+    private String currentClipFilter = "All";
+    private String currentGifCategory = null; // null means showing the 8 visual category cards
 
     private LinearLayout topBarContainer;
     private HorizontalScrollView categoryScrollView;
     private LinearLayout categoryStripLayout;
-    private HorizontalScrollView filterScrollView;
-    private LinearLayout filterChipsLayout;
-    private EditText etSearch;
+
+    private HorizontalScrollView clipFilterScrollView;
+    private LinearLayout clipFilterChipsLayout;
+
+    private LinearLayout gifHeaderLayout;
+    private TextView tvGifBackBtn;
+    private TextView tvGifActiveCategory;
+    private HorizontalScrollView gifFilterScrollView;
+    private LinearLayout gifFilterChipsLayout;
+
+    private HorizontalScrollView kaomojiFilterScrollView;
+    private LinearLayout kaomojiFilterChipsLayout;
+    private String currentKaomojiFilter = "All";
+
     private FrameLayout contentContainer;
 
     private RecyclerView recyclerEmojis;
     private RecyclerView recyclerClips;
+    private RecyclerView recyclerGifCategories;
     private RecyclerView recyclerGifs;
     private RecyclerView recyclerKaomoji;
 
@@ -68,6 +79,7 @@ public class EmojiKeyboardView extends FrameLayout {
 
     private EmojiAdapter emojiAdapter;
     private VideoClipAdapter clipsAdapter;
+    private GifCategoryAdapter gifCategoryAdapter;
     private GifCardAdapter gifAdapter;
     private KaomojiAdapter kaomojiAdapter;
 
@@ -97,93 +109,110 @@ public class EmojiKeyboardView extends FrameLayout {
         root.setOrientation(LinearLayout.VERTICAL);
         root.setLayoutParams(new LayoutParams(LayoutParams.MATCH_PARENT, LayoutParams.MATCH_PARENT));
 
-        // 1. Top Bar: Search Bar + Categories / Filters
+        // 1. Top Bar Container (No Search Bar - Streamlined Direct Categories)
         topBarContainer = new LinearLayout(context);
         topBarContainer.setOrientation(LinearLayout.VERTICAL);
         topBarContainer.setLayoutParams(new LinearLayout.LayoutParams(LayoutParams.MATCH_PARENT, LayoutParams.WRAP_CONTENT));
         topBarContainer.setBackgroundColor(ContextCompatColor(context, R.color.candidate_bar_bg));
 
-        // Search Bar
-        LinearLayout searchLayout = new LinearLayout(context);
-        searchLayout.setOrientation(LinearLayout.HORIZONTAL);
-        searchLayout.setGravity(Gravity.CENTER_VERTICAL);
-        searchLayout.setPadding(dpToPx(12), dpToPx(4), dpToPx(12), dpToPx(2));
-
-        TextView tvSearchIcon = new TextView(context);
-        tvSearchIcon.setText("🔍");
-        tvSearchIcon.setTextSize(TypedValue.COMPLEX_UNIT_SP, 13f);
-        searchLayout.addView(tvSearchIcon);
-
-        etSearch = new EditText(context);
-        etSearch.setHint("Search emojis, clips & GIFs...");
-        etSearch.setHintTextColor(0xFF94A3B8);
-        etSearch.setTextSize(TypedValue.COMPLEX_UNIT_SP, 13.5f);
-        etSearch.setTextColor(ContextCompatColor(context, R.color.key_text_color));
-        etSearch.setBackground(null);
-        etSearch.setSingleLine(true);
-        LinearLayout.LayoutParams searchLp = new LinearLayout.LayoutParams(0, dpToPx(34), 1.0f);
-        searchLp.setMarginStart(dpToPx(8));
-        etSearch.setLayoutParams(searchLp);
-        etSearch.addTextChangedListener(new TextWatcher() {
-            @Override
-            public void beforeTextChanged(CharSequence s, int start, int count, int after) {}
-
-            @Override
-            public void onTextChanged(CharSequence s, int start, int before, int count) {
-                applySearch(s != null ? s.toString() : "");
-            }
-
-            @Override
-            public void afterTextChanged(Editable s) {}
-        });
-        searchLayout.addView(etSearch);
-        topBarContainer.addView(searchLayout);
-
-        // Emoji Categories Strip
+        // 1A. Emoji Categories Strip
         categoryScrollView = new HorizontalScrollView(context);
         categoryScrollView.setHorizontalScrollBarEnabled(false);
-        categoryScrollView.setLayoutParams(new LinearLayout.LayoutParams(LayoutParams.MATCH_PARENT, dpToPx(36)));
+        categoryScrollView.setLayoutParams(new LinearLayout.LayoutParams(LayoutParams.MATCH_PARENT, dpToPx(38)));
         categoryStripLayout = new LinearLayout(context);
         categoryStripLayout.setOrientation(LinearLayout.HORIZONTAL);
         categoryStripLayout.setGravity(Gravity.CENTER_VERTICAL);
-        categoryStripLayout.setPadding(dpToPx(6), 0, dpToPx(6), dpToPx(2));
+        categoryStripLayout.setPadding(dpToPx(6), 0, dpToPx(6), 0);
         buildCategoryTabs(context);
         categoryScrollView.addView(categoryStripLayout);
         topBarContainer.addView(categoryScrollView);
 
-        // Media Filter Chips (For Clips and GIFs: All, Trending, Memes, Bollywood, Desi, etc.)
-        filterScrollView = new HorizontalScrollView(context);
-        filterScrollView.setHorizontalScrollBarEnabled(false);
-        filterScrollView.setLayoutParams(new LinearLayout.LayoutParams(LayoutParams.MATCH_PARENT, dpToPx(36)));
-        filterChipsLayout = new LinearLayout(context);
-        filterChipsLayout.setOrientation(LinearLayout.HORIZONTAL);
-        filterChipsLayout.setGravity(Gravity.CENTER_VERTICAL);
-        filterChipsLayout.setPadding(dpToPx(6), 0, dpToPx(6), dpToPx(2));
-        buildMediaFilterChips(context);
-        filterScrollView.addView(filterChipsLayout);
-        filterScrollView.setVisibility(View.GONE);
-        topBarContainer.addView(filterScrollView);
+        // 1B. Clips Filter Chips (All, Trending, Memes, Bollywood, Celebration, Desi, Love)
+        clipFilterScrollView = new HorizontalScrollView(context);
+        clipFilterScrollView.setHorizontalScrollBarEnabled(false);
+        clipFilterScrollView.setLayoutParams(new LinearLayout.LayoutParams(LayoutParams.MATCH_PARENT, dpToPx(38)));
+        clipFilterChipsLayout = new LinearLayout(context);
+        clipFilterChipsLayout.setOrientation(LinearLayout.HORIZONTAL);
+        clipFilterChipsLayout.setGravity(Gravity.CENTER_VERTICAL);
+        clipFilterChipsLayout.setPadding(dpToPx(6), 0, dpToPx(6), 0);
+        buildClipFilterChips(context);
+        clipFilterScrollView.addView(clipFilterChipsLayout);
+        clipFilterScrollView.setVisibility(View.GONE);
+        topBarContainer.addView(clipFilterScrollView);
+
+        // 1C. GIF Header & Category Switcher Bar (Back button + Title + Category chips)
+        gifHeaderLayout = new LinearLayout(context);
+        gifHeaderLayout.setOrientation(LinearLayout.HORIZONTAL);
+        gifHeaderLayout.setGravity(Gravity.CENTER_VERTICAL);
+        gifHeaderLayout.setLayoutParams(new LinearLayout.LayoutParams(LayoutParams.MATCH_PARENT, dpToPx(38)));
+        gifHeaderLayout.setPadding(dpToPx(6), 0, dpToPx(6), 0);
+        gifHeaderLayout.setVisibility(View.GONE);
+
+        tvGifBackBtn = new TextView(context);
+        tvGifBackBtn.setText("‹ All");
+        tvGifBackBtn.setTextSize(TypedValue.COMPLEX_UNIT_SP, 13f);
+        tvGifBackBtn.setTypeface(null, android.graphics.Typeface.BOLD);
+        tvGifBackBtn.setTextColor(0xFF38BDF8);
+        tvGifBackBtn.setBackgroundResource(R.drawable.bg_suggestion_chip);
+        tvGifBackBtn.setPadding(dpToPx(10), dpToPx(4), dpToPx(10), dpToPx(4));
+        tvGifBackBtn.setGravity(Gravity.CENTER);
+        tvGifBackBtn.setOnClickListener(v -> {
+            performFeedback();
+            showGifCategoryOverview();
+        });
+        gifHeaderLayout.addView(tvGifBackBtn);
+
+        tvGifActiveCategory = new TextView(context);
+        tvGifActiveCategory.setTextSize(TypedValue.COMPLEX_UNIT_SP, 13f);
+        tvGifActiveCategory.setTypeface(null, android.graphics.Typeface.BOLD);
+        tvGifActiveCategory.setTextColor(ContextCompatColor(context, R.color.key_text_color));
+        tvGifActiveCategory.setPadding(dpToPx(8), 0, dpToPx(8), 0);
+        gifHeaderLayout.addView(tvGifActiveCategory);
+
+        gifFilterScrollView = new HorizontalScrollView(context);
+        gifFilterScrollView.setHorizontalScrollBarEnabled(false);
+        gifFilterScrollView.setLayoutParams(new LinearLayout.LayoutParams(0, dpToPx(38), 1.0f));
+        gifFilterChipsLayout = new LinearLayout(context);
+        gifFilterChipsLayout.setOrientation(LinearLayout.HORIZONTAL);
+        gifFilterChipsLayout.setGravity(Gravity.CENTER_VERTICAL);
+        buildGifFilterChips(context);
+        gifFilterScrollView.addView(gifFilterChipsLayout);
+        gifHeaderLayout.addView(gifFilterScrollView);
+        topBarContainer.addView(gifHeaderLayout);
+
+        // 1D. Kaomoji Filter Chips
+        kaomojiFilterScrollView = new HorizontalScrollView(context);
+        kaomojiFilterScrollView.setHorizontalScrollBarEnabled(false);
+        kaomojiFilterScrollView.setLayoutParams(new LinearLayout.LayoutParams(LayoutParams.MATCH_PARENT, dpToPx(38)));
+        kaomojiFilterChipsLayout = new LinearLayout(context);
+        kaomojiFilterChipsLayout.setOrientation(LinearLayout.HORIZONTAL);
+        kaomojiFilterChipsLayout.setGravity(Gravity.CENTER_VERTICAL);
+        kaomojiFilterChipsLayout.setPadding(dpToPx(6), 0, dpToPx(6), 0);
+        buildKaomojiFilterChips(context);
+        kaomojiFilterScrollView.addView(kaomojiFilterChipsLayout);
+        kaomojiFilterScrollView.setVisibility(View.GONE);
+        topBarContainer.addView(kaomojiFilterScrollView);
 
         root.addView(topBarContainer);
 
-        // 2. Middle Content Container
+        // 2. Middle Content Container (Fills standard keyboard height seamlessly)
         contentContainer = new FrameLayout(context);
         LinearLayout.LayoutParams contentLp = new LinearLayout.LayoutParams(
                 LayoutParams.MATCH_PARENT, 0, 1.0f
         );
         contentContainer.setLayoutParams(contentLp);
 
-        // Emoji Recycler
+        // 2A. Emoji Recycler (8 Columns)
         recyclerEmojis = new RecyclerView(context);
         recyclerEmojis.setLayoutParams(new LayoutParams(LayoutParams.MATCH_PARENT, LayoutParams.MATCH_PARENT));
         recyclerEmojis.setLayoutManager(new GridLayoutManager(context, 8));
         recyclerEmojis.setClipToPadding(false);
-        recyclerEmojis.setPadding(dpToPx(4), dpToPx(2), dpToPx(4), dpToPx(4));
+        recyclerEmojis.setPadding(dpToPx(4), dpToPx(4), dpToPx(4), dpToPx(4));
         emojiAdapter = new EmojiAdapter(getEmojisForCategory(currentCategory));
         recyclerEmojis.setAdapter(emojiAdapter);
         contentContainer.addView(recyclerEmojis);
 
-        // Video Clips Recycler
+        // 2B. Video Clips Recycler (2 Columns)
         recyclerClips = new RecyclerView(context);
         recyclerClips.setLayoutParams(new LayoutParams(LayoutParams.MATCH_PARENT, LayoutParams.MATCH_PARENT));
         recyclerClips.setLayoutManager(new GridLayoutManager(context, 2));
@@ -194,18 +223,29 @@ public class EmojiKeyboardView extends FrameLayout {
         recyclerClips.setVisibility(View.GONE);
         contentContainer.addView(recyclerClips);
 
-        // GIF Recycler
+        // 2C. Visual GIF Categories Cards Recycler (2 Columns, matching Screenshot 3)
+        recyclerGifCategories = new RecyclerView(context);
+        recyclerGifCategories.setLayoutParams(new LayoutParams(LayoutParams.MATCH_PARENT, LayoutParams.MATCH_PARENT));
+        recyclerGifCategories.setLayoutManager(new GridLayoutManager(context, 2));
+        recyclerGifCategories.setClipToPadding(false);
+        recyclerGifCategories.setPadding(dpToPx(6), dpToPx(4), dpToPx(6), dpToPx(6));
+        gifCategoryAdapter = new GifCategoryAdapter(EmojiData.getGifVisualCategories());
+        recyclerGifCategories.setAdapter(gifCategoryAdapter);
+        recyclerGifCategories.setVisibility(View.GONE);
+        contentContainer.addView(recyclerGifCategories);
+
+        // 2D. GIF Items Recycler (2 Columns, when a category is selected)
         recyclerGifs = new RecyclerView(context);
         recyclerGifs.setLayoutParams(new LayoutParams(LayoutParams.MATCH_PARENT, LayoutParams.MATCH_PARENT));
         recyclerGifs.setLayoutManager(new GridLayoutManager(context, 2));
         recyclerGifs.setClipToPadding(false);
         recyclerGifs.setPadding(dpToPx(6), dpToPx(4), dpToPx(6), dpToPx(6));
-        gifAdapter = new GifCardAdapter(EmojiData.getAllGifCards());
+        gifAdapter = new GifCardAdapter(Collections.emptyList());
         recyclerGifs.setAdapter(gifAdapter);
         recyclerGifs.setVisibility(View.GONE);
         contentContainer.addView(recyclerGifs);
 
-        // Kaomoji Recycler
+        // 2E. Kaomoji Recycler (3 Columns)
         recyclerKaomoji = new RecyclerView(context);
         recyclerKaomoji.setLayoutParams(new LayoutParams(LayoutParams.MATCH_PARENT, LayoutParams.MATCH_PARENT));
         recyclerKaomoji.setLayoutManager(new GridLayoutManager(context, 3));
@@ -219,25 +259,26 @@ public class EmojiKeyboardView extends FrameLayout {
         root.addView(contentContainer);
 
         // 3. Bottom Control Bar (ABC Large, Emoji, Clips, GIF, Kaomoji, Spacer, Backspace)
+        // With bottom padding so buttons do not hit system gesture/nav bars
         bottomBarLayout = new LinearLayout(context);
         bottomBarLayout.setOrientation(LinearLayout.HORIZONTAL);
         bottomBarLayout.setGravity(Gravity.CENTER_VERTICAL);
-        bottomBarLayout.setPadding(dpToPx(8), dpToPx(3), dpToPx(8), dpToPx(3));
+        bottomBarLayout.setPadding(dpToPx(8), dpToPx(2), dpToPx(8), dpToPx(6));
         bottomBarLayout.setBackgroundColor(ContextCompatColor(context, R.color.candidate_bar_bg));
         LinearLayout.LayoutParams bottomBarLp = new LinearLayout.LayoutParams(
-                LayoutParams.MATCH_PARENT, dpToPx(48)
+                LayoutParams.MATCH_PARENT, dpToPx(46)
         );
         bottomBarLayout.setLayoutParams(bottomBarLp);
 
         // Large ABC Button as requested
         tvAbc = new TextView(context);
         tvAbc.setText("ABC");
-        tvAbc.setTextSize(TypedValue.COMPLEX_UNIT_SP, 16f);
+        tvAbc.setTextSize(TypedValue.COMPLEX_UNIT_SP, 15f);
         tvAbc.setTypeface(null, android.graphics.Typeface.BOLD);
         tvAbc.setTextColor(0xFFFFFFFF);
         tvAbc.setBackgroundResource(R.drawable.bg_key_action);
         tvAbc.setGravity(Gravity.CENTER);
-        LinearLayout.LayoutParams abcLp = new LinearLayout.LayoutParams(dpToPx(76), dpToPx(38));
+        LinearLayout.LayoutParams abcLp = new LinearLayout.LayoutParams(dpToPx(76), dpToPx(36));
         tvAbc.setLayoutParams(abcLp);
         tvAbc.setOnClickListener(v -> {
             performFeedback();
@@ -246,17 +287,17 @@ public class EmojiKeyboardView extends FrameLayout {
         bottomBarLayout.addView(tvAbc);
 
         // Emoji Tab
-        tvEmojiTab = createBottomTab("😊", dpToPx(42));
+        tvEmojiTab = createBottomTab("😊", dpToPx(44));
         tvEmojiTab.setOnClickListener(v -> switchMainTab(TAB_EMOJI));
         bottomBarLayout.addView(tvEmojiTab);
 
-        // Video Clips Tab (NEW)
+        // Video Clips Tab
         tvClipsTab = createBottomTab("▶ CLIPS", dpToPx(68));
         tvClipsTab.setOnClickListener(v -> switchMainTab(TAB_CLIPS));
         bottomBarLayout.addView(tvClipsTab);
 
         // GIF Tab
-        tvGifTab = createBottomTab("GIF", dpToPx(46));
+        tvGifTab = createBottomTab("GIF", dpToPx(48));
         tvGifTab.setOnClickListener(v -> switchMainTab(TAB_GIF));
         bottomBarLayout.addView(tvGifTab);
 
@@ -276,7 +317,7 @@ public class EmojiKeyboardView extends FrameLayout {
         ibBackspace.setImageResource(R.drawable.ic_backspace);
         ibBackspace.setBackgroundResource(R.drawable.bg_key_action);
         ibBackspace.setColorFilter(ContextCompatColor(context, R.color.key_text_action));
-        LinearLayout.LayoutParams bsLp = new LinearLayout.LayoutParams(dpToPx(54), dpToPx(38));
+        LinearLayout.LayoutParams bsLp = new LinearLayout.LayoutParams(dpToPx(52), dpToPx(36));
         ibBackspace.setLayoutParams(bsLp);
         ibBackspace.setOnClickListener(v -> {
             performFeedback();
@@ -297,7 +338,7 @@ public class EmojiKeyboardView extends FrameLayout {
         tv.setTextSize(TypedValue.COMPLEX_UNIT_SP, label.equals("😊") ? 17f : 12f);
         tv.setTypeface(null, android.graphics.Typeface.BOLD);
         tv.setGravity(Gravity.CENTER);
-        LinearLayout.LayoutParams lp = new LinearLayout.LayoutParams(width, dpToPx(38));
+        LinearLayout.LayoutParams lp = new LinearLayout.LayoutParams(width, dpToPx(36));
         lp.setMarginStart(dpToPx(4));
         tv.setLayoutParams(lp);
         return tv;
@@ -326,7 +367,6 @@ public class EmojiKeyboardView extends FrameLayout {
             catView.setOnClickListener(v -> {
                 performFeedback();
                 currentCategory = catIcon;
-                etSearch.setText("");
                 buildCategoryTabs(getContext());
                 emojiAdapter.updateList(getEmojisForCategory(currentCategory));
                 recyclerEmojis.scrollToPosition(0);
@@ -336,8 +376,8 @@ public class EmojiKeyboardView extends FrameLayout {
         }
     }
 
-    private void buildMediaFilterChips(Context context) {
-        filterChipsLayout.removeAllViews();
+    private void buildClipFilterChips(Context context) {
+        clipFilterChipsLayout.removeAllViews();
         String[] filters = {"All", "Trending", "Memes", "Bollywood", "Celebration", "Desi", "Love"};
         for (final String filter : filters) {
             TextView chip = new TextView(context);
@@ -346,23 +386,84 @@ public class EmojiKeyboardView extends FrameLayout {
             chip.setTypeface(null, android.graphics.Typeface.BOLD);
             chip.setGravity(Gravity.CENTER);
 
-            boolean isSelected = filter.equals(currentMediaFilter);
+            boolean isSelected = filter.equals(currentClipFilter);
             chip.setTextColor(isSelected ? 0xFFFFFFFF : ContextCompatColor(context, R.color.key_text_color));
             chip.setBackgroundResource(isSelected ? R.drawable.bg_suggestion_chip : R.drawable.bg_key_action);
             chip.setPadding(dpToPx(10), dpToPx(4), dpToPx(10), dpToPx(4));
 
-            LinearLayout.LayoutParams lp = new LinearLayout.LayoutParams(ViewGroup.LayoutParams.WRAP_CONTENT, dpToPx(30));
+            LinearLayout.LayoutParams lp = new LinearLayout.LayoutParams(ViewGroup.LayoutParams.WRAP_CONTENT, dpToPx(28));
             lp.setMargins(dpToPx(3), 0, dpToPx(3), 0);
             chip.setLayoutParams(lp);
 
             chip.setOnClickListener(v -> {
                 performFeedback();
-                currentMediaFilter = filter;
-                buildMediaFilterChips(getContext());
-                applyMediaFilter();
+                currentClipFilter = filter;
+                buildClipFilterChips(getContext());
+                applyClipFilter();
             });
 
-            filterChipsLayout.addView(chip);
+            clipFilterChipsLayout.addView(chip);
+        }
+    }
+
+    private void buildGifFilterChips(Context context) {
+        gifFilterChipsLayout.removeAllViews();
+        List<EmojiData.GifCategory> cats = EmojiData.getGifVisualCategories();
+        for (final EmojiData.GifCategory cat : cats) {
+            TextView chip = new TextView(context);
+            chip.setText(cat.icon + " " + cat.title);
+            chip.setTextSize(TypedValue.COMPLEX_UNIT_SP, 11.5f);
+            chip.setTypeface(null, android.graphics.Typeface.BOLD);
+            chip.setGravity(Gravity.CENTER);
+
+            boolean isSelected = cat.id.equalsIgnoreCase(currentGifCategory);
+            chip.setTextColor(isSelected ? 0xFFFFFFFF : ContextCompatColor(context, R.color.key_text_color));
+            chip.setBackgroundResource(isSelected ? R.drawable.bg_suggestion_chip : R.drawable.bg_key_action);
+            chip.setPadding(dpToPx(8), dpToPx(4), dpToPx(8), dpToPx(4));
+
+            LinearLayout.LayoutParams lp = new LinearLayout.LayoutParams(ViewGroup.LayoutParams.WRAP_CONTENT, dpToPx(28));
+            lp.setMargins(dpToPx(3), 0, dpToPx(3), 0);
+            chip.setLayoutParams(lp);
+
+            chip.setOnClickListener(v -> {
+                performFeedback();
+                selectGifCategory(cat.id, cat.title);
+            });
+
+            gifFilterChipsLayout.addView(chip);
+        }
+    }
+
+    private void buildKaomojiFilterChips(Context context) {
+        kaomojiFilterChipsLayout.removeAllViews();
+        List<String> groups = new ArrayList<>();
+        groups.add("All");
+        groups.addAll(EmojiData.KAOMOJI_CATEGORIES.keySet());
+
+        for (final String group : groups) {
+            TextView chip = new TextView(context);
+            chip.setText(group);
+            chip.setTextSize(TypedValue.COMPLEX_UNIT_SP, 12f);
+            chip.setTypeface(null, android.graphics.Typeface.BOLD);
+            chip.setGravity(Gravity.CENTER);
+
+            boolean isSelected = group.equals(currentKaomojiFilter);
+            chip.setTextColor(isSelected ? 0xFFFFFFFF : ContextCompatColor(context, R.color.key_text_color));
+            chip.setBackgroundResource(isSelected ? R.drawable.bg_suggestion_chip : R.drawable.bg_key_action);
+            chip.setPadding(dpToPx(10), dpToPx(4), dpToPx(10), dpToPx(4));
+
+            LinearLayout.LayoutParams lp = new LinearLayout.LayoutParams(ViewGroup.LayoutParams.WRAP_CONTENT, dpToPx(28));
+            lp.setMargins(dpToPx(3), 0, dpToPx(3), 0);
+            chip.setLayoutParams(lp);
+
+            chip.setOnClickListener(v -> {
+                performFeedback();
+                currentKaomojiFilter = group;
+                buildKaomojiFilterChips(getContext());
+                applyKaomojiFilter();
+            });
+
+            kaomojiFilterChipsLayout.addView(chip);
         }
     }
 
@@ -372,13 +473,26 @@ public class EmojiKeyboardView extends FrameLayout {
 
         recyclerEmojis.setVisibility(tab == TAB_EMOJI ? View.VISIBLE : View.GONE);
         recyclerClips.setVisibility(tab == TAB_CLIPS ? View.VISIBLE : View.GONE);
-        recyclerGifs.setVisibility(tab == TAB_GIF ? View.VISIBLE : View.GONE);
         recyclerKaomoji.setVisibility(tab == TAB_KAOMOJI ? View.VISIBLE : View.GONE);
 
         // Header controls visibility
         categoryScrollView.setVisibility(tab == TAB_EMOJI ? View.VISIBLE : View.GONE);
-        filterScrollView.setVisibility((tab == TAB_CLIPS || tab == TAB_GIF) ? View.VISIBLE : View.GONE);
-        topBarContainer.setVisibility(tab == TAB_KAOMOJI ? View.GONE : View.VISIBLE);
+        clipFilterScrollView.setVisibility(tab == TAB_CLIPS ? View.VISIBLE : View.GONE);
+        kaomojiFilterScrollView.setVisibility(tab == TAB_KAOMOJI ? View.VISIBLE : View.GONE);
+
+        if (tab == TAB_GIF) {
+            if (currentGifCategory == null) {
+                showGifCategoryOverview();
+            } else {
+                showGifCategoryItems(currentGifCategory, currentGifCategory);
+            }
+        } else {
+            gifHeaderLayout.setVisibility(View.GONE);
+            recyclerGifCategories.setVisibility(View.GONE);
+            recyclerGifs.setVisibility(View.GONE);
+        }
+
+        topBarContainer.setVisibility(View.VISIBLE);
 
         highlightTab(tvEmojiTab, tab == TAB_EMOJI);
         highlightTab(tvClipsTab, tab == TAB_CLIPS);
@@ -388,16 +502,53 @@ public class EmojiKeyboardView extends FrameLayout {
         if (tab == TAB_EMOJI) {
             buildCategoryTabs(getContext());
             emojiAdapter.updateList(getEmojisForCategory(currentCategory));
-        } else if (tab == TAB_CLIPS || tab == TAB_GIF) {
-            buildMediaFilterChips(getContext());
-            applyMediaFilter();
+        } else if (tab == TAB_CLIPS) {
+            buildClipFilterChips(getContext());
+            applyClipFilter();
+        } else if (tab == TAB_KAOMOJI) {
+            buildKaomojiFilterChips(getContext());
+            applyKaomojiFilter();
         }
+    }
+
+    private void showGifCategoryOverview() {
+        currentGifCategory = null;
+        gifHeaderLayout.setVisibility(View.GONE);
+        recyclerGifs.setVisibility(View.GONE);
+        recyclerGifCategories.setVisibility(View.VISIBLE);
+        recyclerGifCategories.scrollToPosition(0);
+    }
+
+    private void selectGifCategory(String categoryId, String categoryTitle) {
+        currentGifCategory = categoryId;
+        showGifCategoryItems(categoryId, categoryTitle);
+    }
+
+    private void showGifCategoryItems(String categoryId, String categoryTitle) {
+        recyclerGifCategories.setVisibility(View.GONE);
+        gifHeaderLayout.setVisibility(View.VISIBLE);
+        tvGifActiveCategory.setText(categoryTitle);
+        buildGifFilterChips(getContext());
+
+        List<EmojiData.GifCard> all = EmojiData.getAllGifCards();
+        List<EmojiData.GifCard> filtered = new ArrayList<>();
+        for (EmojiData.GifCard g : all) {
+            if (g.category.equalsIgnoreCase(categoryId)) {
+                filtered.add(g);
+            }
+        }
+        if (filtered.isEmpty()) {
+            filtered.addAll(all);
+        }
+        gifAdapter.updateList(filtered);
+        recyclerGifs.setVisibility(View.VISIBLE);
+        recyclerGifs.scrollToPosition(0);
     }
 
     private void highlightTab(TextView tabView, boolean active) {
         if (active) {
-            tabView.setBackgroundResource(R.drawable.bg_key_action);
-            tabView.setTextColor(ContextCompatColor(getContext(), R.color.key_text_color));
+            tabView.setBackgroundResource(R.drawable.bg_suggestion_chip);
+            tabView.setTextColor(0xFFFFFFFF);
             tabView.setAlpha(1.0f);
         } else {
             tabView.setBackground(null);
@@ -406,46 +557,28 @@ public class EmojiKeyboardView extends FrameLayout {
         }
     }
 
-    private void applyMediaFilter() {
-        String query = etSearch.getText() != null ? etSearch.getText().toString().trim().toLowerCase() : "";
-        if (currentTab == TAB_CLIPS) {
-            List<EmojiData.VideoClip> all = EmojiData.getAllVideoClips();
-            List<EmojiData.VideoClip> filtered = new ArrayList<>();
-            for (EmojiData.VideoClip c : all) {
-                boolean matchesFilter = "All".equals(currentMediaFilter) || c.category.equalsIgnoreCase(currentMediaFilter);
-                boolean matchesQuery = query.isEmpty() || c.title.toLowerCase().contains(query) || c.caption.toLowerCase().contains(query);
-                if (matchesFilter && matchesQuery) {
-                    filtered.add(c);
-                }
+    private void applyClipFilter() {
+        List<EmojiData.VideoClip> all = EmojiData.getAllVideoClips();
+        List<EmojiData.VideoClip> filtered = new ArrayList<>();
+        for (EmojiData.VideoClip c : all) {
+            if ("All".equals(currentClipFilter) || c.category.equalsIgnoreCase(currentClipFilter)) {
+                filtered.add(c);
             }
-            clipsAdapter.updateList(filtered);
-            recyclerClips.scrollToPosition(0);
-        } else if (currentTab == TAB_GIF) {
-            List<EmojiData.GifCard> all = EmojiData.getAllGifCards();
-            List<EmojiData.GifCard> filtered = new ArrayList<>();
-            for (EmojiData.GifCard g : all) {
-                boolean matchesFilter = "All".equals(currentMediaFilter) || g.category.equalsIgnoreCase(currentMediaFilter);
-                boolean matchesQuery = query.isEmpty() || g.title.toLowerCase().contains(query) || g.message.toLowerCase().contains(query);
-                if (matchesFilter && matchesQuery) {
-                    filtered.add(g);
-                }
-            }
-            gifAdapter.updateList(filtered);
-            recyclerGifs.scrollToPosition(0);
         }
+        clipsAdapter.updateList(filtered);
+        recyclerClips.scrollToPosition(0);
     }
 
-    private void applySearch(String query) {
-        if (currentTab == TAB_EMOJI) {
-            if (query.trim().isEmpty()) {
-                emojiAdapter.updateList(getEmojisForCategory(currentCategory));
-            } else {
-                emojiAdapter.updateList(EmojiData.searchEmojis(query));
-            }
-            recyclerEmojis.scrollToPosition(0);
-        } else if (currentTab == TAB_CLIPS || currentTab == TAB_GIF) {
-            applyMediaFilter();
+    private void applyKaomojiFilter() {
+        List<String> result = new ArrayList<>();
+        if ("All".equals(currentKaomojiFilter)) {
+            result = getAllKaomojis();
+        } else {
+            List<String> list = EmojiData.KAOMOJI_CATEGORIES.get(currentKaomojiFilter);
+            if (list != null) result.addAll(list);
         }
+        kaomojiAdapter.updateList(result);
+        recyclerKaomoji.scrollToPosition(0);
     }
 
     private List<String> getEmojisForCategory(String category) {
@@ -506,7 +639,9 @@ public class EmojiKeyboardView extends FrameLayout {
         } catch (Exception ignored) {}
     }
 
-    // Emoji Adapter
+    // ==========================================
+    // ADAPTER 1: Emoji Grid Adapter (8 Columns)
+    // ==========================================
     private class EmojiAdapter extends RecyclerView.Adapter<EmojiAdapter.EmojiViewHolder> {
         private List<String> list;
 
@@ -558,7 +693,9 @@ public class EmojiKeyboardView extends FrameLayout {
         }
     }
 
-    // Video Clips Adapter (NEW)
+    // ==========================================
+    // ADAPTER 2: Video Clips Adapter (2 Columns)
+    // ==========================================
     private class VideoClipAdapter extends RecyclerView.Adapter<VideoClipAdapter.ClipViewHolder> {
         private List<EmojiData.VideoClip> list;
 
@@ -581,13 +718,13 @@ public class EmojiKeyboardView extends FrameLayout {
 
             GridLayoutManager.LayoutParams lp = new GridLayoutManager.LayoutParams(
                     ViewGroup.LayoutParams.MATCH_PARENT,
-                    dpToPx(76)
+                    dpToPx(74)
             );
             int m = dpToPx(4);
             lp.setMargins(m, m, m, m);
             card.setLayoutParams(lp);
 
-            // Header row: Emoji + Tag + Duration
+            // Header row: Emoji + Duration
             LinearLayout header = new LinearLayout(parent.getContext());
             header.setOrientation(LinearLayout.HORIZONTAL);
             header.setGravity(Gravity.CENTER_VERTICAL);
@@ -663,7 +800,81 @@ public class EmojiKeyboardView extends FrameLayout {
         }
     }
 
-    // GIF and Greeting Cards Adapter
+    // =========================================================================
+    // ADAPTER 3: Visual GIF Categories Cards Adapter (2 Columns - Screenshot 3)
+    // =========================================================================
+    private class GifCategoryAdapter extends RecyclerView.Adapter<GifCategoryAdapter.CategoryViewHolder> {
+        private final List<EmojiData.GifCategory> categories;
+
+        public GifCategoryAdapter(List<EmojiData.GifCategory> categories) {
+            this.categories = categories;
+        }
+
+        @NonNull
+        @Override
+        public CategoryViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
+            LinearLayout card = new LinearLayout(parent.getContext());
+            card.setOrientation(LinearLayout.HORIZONTAL);
+            card.setGravity(Gravity.CENTER);
+            card.setPadding(dpToPx(10), dpToPx(8), dpToPx(10), dpToPx(8));
+
+            GridLayoutManager.LayoutParams lp = new GridLayoutManager.LayoutParams(
+                    ViewGroup.LayoutParams.MATCH_PARENT,
+                    dpToPx(66)
+            );
+            int m = dpToPx(4);
+            lp.setMargins(m, m, m, m);
+            card.setLayoutParams(lp);
+
+            TextView tvTitle = new TextView(parent.getContext());
+            tvTitle.setTextSize(TypedValue.COMPLEX_UNIT_SP, 15f);
+            tvTitle.setTypeface(null, android.graphics.Typeface.BOLD);
+            tvTitle.setTextColor(0xFFFFFFFF);
+            tvTitle.setShadowLayer(4f, 1f, 2f, 0x90000000);
+            tvTitle.setGravity(Gravity.CENTER);
+            card.addView(tvTitle);
+
+            return new CategoryViewHolder(card, tvTitle);
+        }
+
+        @Override
+        public void onBindViewHolder(@NonNull CategoryViewHolder holder, int position) {
+            EmojiData.GifCategory cat = categories.get(position);
+            holder.tvTitle.setText(cat.icon + "  " + cat.title);
+
+            // Rich Gradient Background with Rounded Corners
+            GradientDrawable gd = new GradientDrawable(
+                    GradientDrawable.Orientation.TL_BR,
+                    cat.gradientColors
+            );
+            gd.setCornerRadius(dpToPx(12));
+            holder.card.setBackground(gd);
+
+            holder.itemView.setOnClickListener(v -> {
+                performFeedback();
+                selectGifCategory(cat.id, cat.title);
+            });
+        }
+
+        @Override
+        public int getItemCount() {
+            return categories.size();
+        }
+
+        class CategoryViewHolder extends RecyclerView.ViewHolder {
+            LinearLayout card;
+            TextView tvTitle;
+            CategoryViewHolder(View itemView, TextView tvTitle) {
+                super(itemView);
+                this.card = (LinearLayout) itemView;
+                this.tvTitle = tvTitle;
+            }
+        }
+    }
+
+    // ==========================================
+    // ADAPTER 4: GIF Cards Adapter (2 Columns)
+    // ==========================================
     private class GifCardAdapter extends RecyclerView.Adapter<GifCardAdapter.GifViewHolder> {
         private List<EmojiData.GifCard> list;
 
@@ -688,14 +899,14 @@ public class EmojiKeyboardView extends FrameLayout {
 
             GridLayoutManager.LayoutParams lp = new GridLayoutManager.LayoutParams(
                     ViewGroup.LayoutParams.MATCH_PARENT,
-                    dpToPx(74)
+                    dpToPx(72)
             );
             int m = dpToPx(4);
             lp.setMargins(m, m, m, m);
             card.setLayoutParams(lp);
 
             TextView tvEmoji = new TextView(parent.getContext());
-            tvEmoji.setTextSize(TypedValue.COMPLEX_UNIT_SP, 24f);
+            tvEmoji.setTextSize(TypedValue.COMPLEX_UNIT_SP, 22f);
             tvEmoji.setGravity(Gravity.CENTER);
             card.addView(tvEmoji);
 
@@ -704,9 +915,17 @@ public class EmojiKeyboardView extends FrameLayout {
             tvTitle.setTypeface(null, android.graphics.Typeface.BOLD);
             tvTitle.setTextColor(ContextCompatColor(parent.getContext(), R.color.key_text_color));
             tvTitle.setGravity(Gravity.CENTER);
+            tvTitle.setSingleLine(true);
             card.addView(tvTitle);
 
-            return new GifViewHolder(card, tvEmoji, tvTitle);
+            TextView tvMsg = new TextView(parent.getContext());
+            tvMsg.setTextSize(TypedValue.COMPLEX_UNIT_SP, 10f);
+            tvMsg.setTextColor(0xFF94A3B8);
+            tvMsg.setGravity(Gravity.CENTER);
+            tvMsg.setSingleLine(true);
+            card.addView(tvMsg);
+
+            return new GifViewHolder(card, tvEmoji, tvTitle, tvMsg);
         }
 
         @Override
@@ -714,6 +933,7 @@ public class EmojiKeyboardView extends FrameLayout {
             EmojiData.GifCard item = list.get(position);
             holder.tvEmoji.setText(item.emoji);
             holder.tvTitle.setText(item.title);
+            holder.tvMsg.setText(item.message);
             holder.itemView.setOnClickListener(v -> {
                 performFeedback();
                 if (listener != null) {
@@ -730,20 +950,29 @@ public class EmojiKeyboardView extends FrameLayout {
         class GifViewHolder extends RecyclerView.ViewHolder {
             TextView tvEmoji;
             TextView tvTitle;
-            GifViewHolder(View itemView, TextView tvEmoji, TextView tvTitle) {
+            TextView tvMsg;
+            GifViewHolder(View itemView, TextView tvEmoji, TextView tvTitle, TextView tvMsg) {
                 super(itemView);
                 this.tvEmoji = tvEmoji;
                 this.tvTitle = tvTitle;
+                this.tvMsg = tvMsg;
             }
         }
     }
 
-    // Kaomoji / Text Emoticons Adapter
+    // ==================================================
+    // ADAPTER 5: Kaomoji / Text Emoticons (3 Columns)
+    // ==================================================
     private class KaomojiAdapter extends RecyclerView.Adapter<KaomojiAdapter.KaomojiViewHolder> {
-        private final List<String> list;
+        private List<String> list;
 
         public KaomojiAdapter(List<String> list) {
-            this.list = list;
+            this.list = new ArrayList<>(list);
+        }
+
+        public void updateList(List<String> newList) {
+            this.list = new ArrayList<>(newList);
+            notifyDataSetChanged();
         }
 
         @NonNull

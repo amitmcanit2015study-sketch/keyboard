@@ -272,6 +272,34 @@ public class EmojiData {
         return list;
     }
 
+    // Visual GIF Category Model (As in Gboard / Tenor 2-column cards)
+    public static class GifCategory {
+        public final String id;
+        public final String title;
+        public final int[] gradientColors;
+        public final String icon;
+
+        public GifCategory(String id, String title, int[] gradientColors, String icon) {
+            this.id = id;
+            this.title = title;
+            this.gradientColors = gradientColors;
+            this.icon = icon;
+        }
+    }
+
+    public static List<GifCategory> getGifVisualCategories() {
+        List<GifCategory> categories = new ArrayList<>();
+        categories.add(new GifCategory("Trending", "Trending", new int[]{0xFFFF512F, 0xFFDD2476}, "🔥"));
+        categories.add(new GifCategory("Reactions", "Reactions", new int[]{0xFF4776E6, 0xFF8E54E9}, "🤩"));
+        categories.add(new GifCategory("Greetings", "Greetings", new int[]{0xFF00B4DB, 0xFF0083B0}, "👋"));
+        categories.add(new GifCategory("Perfect", "Perfect", new int[]{0xFFD31027, 0xFFEA384D}, "👌"));
+        categories.add(new GifCategory("Welcome", "Welcome", new int[]{0xFFF7971E, 0xFFFFD200}, "🚪"));
+        categories.add(new GifCategory("Congratulations", "Congratulations", new int[]{0xFF11998E, 0xFF38EF7D}, "🎉"));
+        categories.add(new GifCategory("Thank you", "Thank you", new int[]{0xFF8A2387, 0xFFE94057}, "🙏"));
+        categories.add(new GifCategory("Excited", "Excited", new int[]{0xFFF37335, 0xFFFDC830}, "⚡"));
+        return categories;
+    }
+
     // GIF Card Model & Library
     public static class GifCard {
         public final String emoji;
@@ -289,31 +317,69 @@ public class EmojiData {
 
     public static List<GifCard> getAllGifCards() {
         List<GifCard> cards = new ArrayList<>();
-        // Celebrations & Greetings
-        cards.add(new GifCard("🎉", "Badhai Ho", "🎉 Bahut Bahut Badhai Ho! Mubarak!", "Celebration"));
-        cards.add(new GifCard("🙏", "Namaste", "🙏 Namaste! Pranam!", "Greeting"));
-        cards.add(new GifCard("🎂", "Happy Birthday", "🎂 Janamdin Mubarak! Happy Birthday! 🥳", "Celebration"));
-        cards.add(new GifCard("🪔", "Happy Diwali", "🪔 Deepawali ki hardik shubhkamnayein! Sukh aur samriddhi!", "Celebration"));
-        cards.add(new GifCard("🌙", "Eid Mubarak", "🌙 Eid Mubarak aapko aur aapke parivaar ko!", "Celebration"));
-        cards.add(new GifCard("✨", "Shubhkamnaye", "✨ Hardik Shubhkamnayein aur Aashirwad!", "Greeting"));
-        cards.add(new GifCard("☀️", "Good Morning", "☀️ Shubh Prabhat! Have a wonderful day!", "Greeting"));
-        cards.add(new GifCard("🌙", "Good Night", "🌙 Shubh Ratri! Sweet Dreams! 😴", "Greeting"));
 
-        // Desi & Memes
-        cards.add(new GifCard("☕", "Chai Peelo", "☕ Garma garam Chai peelo doston!", "Desi"));
-        cards.add(new GifCard("🇮🇳", "Jai Hind", "🇮🇳 Jai Hind! Bharat Mata Ki Jai!", "Desi"));
-        cards.add(new GifCard("💃", "Nacho Party", "💃 Nacho nacho! Party time! 🕺🎉", "Celebration"));
-        cards.add(new GifCard("🙌", "Balle Balle", "🙌 Balle Balle! Chak De Phatte!", "Desi"));
-        cards.add(new GifCard("🔥", "Dhamaka", "🔥 Ekdum Dhamaka! Kya baat hai!", "Trending"));
-        cards.add(new GifCard("😎", "Apna Swag", "😎 Apna swag alag hai boss!", "Trending"));
-        cards.add(new GifCard("😂", "Hahaha", "😂 Hahaha! Very funny! Mazaa aa gaya!", "Memes"));
-        cards.add(new GifCard("👍", "Zabardast", "👍 Ekdum Zabardast! Superhit!", "Trending"));
-        cards.add(new GifCard("❤️", "Dil Se", "❤️ Dil se bahut bahut shukriya!", "Love"));
-        cards.add(new GifCard("🤝", "Dosti Forever", "🤝 Dosti zindabad! Yaari forever!", "Love"));
-        cards.add(new GifCard("🤩", "Mindblowing", "🤩 Mindblowing performance!", "Trending"));
-        cards.add(new GifCard("🚀", "Ekdum Mast", "🚀 Ekdum Mast! Full speed!", "Trending"));
-        cards.add(new GifCard("👑", "King Vibe", "👑 Raja beta! Shaandaar entry!", "Memes"));
-        cards.add(new GifCard("💯", "Super Solid", "💯 100% Ekdum sahi baat boli!", "Trending"));
+        // 1. Trending
+        cards.add(new GifCard("🔥", "Pushpa Fire Hai", "🔥 Jhukega nahi saala! Main jhukega nahi!", "Trending"));
+        cards.add(new GifCard("🕺", "Tauba Tauba", "🕺 Killer dance moves on repeat! Tauba Tauba!", "Trending"));
+        cards.add(new GifCard("🚀", "Full Speed", "🚀 100% Full Speed! Mast bullet train!", "Trending"));
+        cards.add(new GifCard("😎", "Apna Swag", "😎 Apna swag alag hai boss! Superhit!", "Trending"));
+        cards.add(new GifCard("⚡", "High Energy", "⚡ High voltage vibe! Sabse aage!", "Trending"));
+        cards.add(new GifCard("✨", "Mindblowing", "✨ Absolutely mindblowing performance!", "Trending"));
+
+        // 2. Reactions
+        cards.add(new GifCard("😱", "Omg Shocking", "😱 Omg! Kya bola tune?! Sach mein?!", "Reactions"));
+        cards.add(new GifCard("😂", "Hahaha Funny", "😂 Hahaha! Pet dard ho gaya haste haste!", "Reactions"));
+        cards.add(new GifCard("🤔", "Thinking", "🤔 25 din mein paisa double? Sochna padega!", "Reactions"));
+        cards.add(new GifCard("🤯", "Mind Blown", "🤯 Khatam! Bye bye! Tata! Goodbye gaya!", "Reactions"));
+        cards.add(new GifCard("👀", "Dekh Raha Hai", "👀 Ohoo dekh raha hai na Vinod!", "Reactions"));
+        cards.add(new GifCard("🥱", "Bore Ho Gaya", "🥱 Bas karo bhai, neend aa rahi hai!", "Reactions"));
+
+        // 3. Greetings
+        cards.add(new GifCard("☀️", "Good Morning", "☀️ Shubh Prabhat! Have a wonderful day ahead!", "Greetings"));
+        cards.add(new GifCard("🌙", "Good Night", "🌙 Shubh Ratri! Sweet dreams! 😴", "Greetings"));
+        cards.add(new GifCard("🙏", "Namaste", "🙏 Namaste ji! Pranam! Aap kaise hain?", "Greetings"));
+        cards.add(new GifCard("👋", "Hello Dost", "👋 Hello friend! Kaise ho sab badhiya?", "Greetings"));
+        cards.add(new GifCard("☕", "Chai Peelo", "☕ Hello friends! Garma garam Chai peelo!", "Greetings"));
+        cards.add(new GifCard("✨", "Shubhkamnaye", "✨ Hardik shubhkamnayein aur ashirwad!", "Greetings"));
+
+        // 4. Perfect
+        cards.add(new GifCard("👌", "Ekdum Perfect", "👌 Chef's kiss! Ekdum lajawab aur perfect!", "Perfect"));
+        cards.add(new GifCard("💯", "Super Solid", "💯 100% Ekdum sahi baat boli!", "Perfect"));
+        cards.add(new GifCard("🎯", "Exact Target", "🎯 Nishana bilkul sahi laga! Spot on!", "Perfect"));
+        cards.add(new GifCard("👏", "Kya Baat Hai", "👏 Wah! Kya baat hai! Lajawab!", "Perfect"));
+        cards.add(new GifCard("⭐", "5-Star Rating", "⭐ Five star perfection! Kamaal kar diya!", "Perfect"));
+        cards.add(new GifCard("👑", "Masterpiece", "👑 Ekdum shaandar aur zabardast!", "Perfect"));
+
+        // 5. Welcome
+        cards.add(new GifCard("🚪", "Swagatam", "🚪 Aapka swagat hai hamare dil mein!", "Welcome"));
+        cards.add(new GifCard("💐", "Welcome Home", "💐 Ji aaya nu! Welcome home!", "Welcome"));
+        cards.add(new GifCard("🤗", "Warm Welcome", "🤗 Dil khol ke tahe dil se swagat!", "Welcome"));
+        cards.add(new GifCard("🌟", "Atithi Devo Bhava", "🌟 Welcome! Aapka aana shubh hua!", "Welcome"));
+        cards.add(new GifCard("🎊", "Grand Entry", "🎊 Dhol nagade bajao! Grand welcome!", "Welcome"));
+
+        // 6. Congratulations
+        cards.add(new GifCard("🎉", "Bahut Badhai", "🎉 Bahut bahut badhai ho! Mubarak!", "Congratulations"));
+        cards.add(new GifCard("🏆", "Victory Champ", "🏆 Chak de phatte! Jeet gaye champion!", "Congratulations"));
+        cards.add(new GifCard("🎂", "Happy Birthday", "🎂 Janamdin Mubarak! Happy Birthday! 🥳", "Congratulations"));
+        cards.add(new GifCard("💍", "Shaadi Mubarak", "💍 Happy Married Life! Mubarak ho!", "Congratulations"));
+        cards.add(new GifCard("🪔", "Diwali Mubarak", "🪔 Happy Diwali! Deepawali mubarak!", "Congratulations"));
+        cards.add(new GifCard("🌙", "Eid Mubarak", "🌙 Eid Mubarak aapko aur parivaar ko!", "Congratulations"));
+
+        // 7. Thank you
+        cards.add(new GifCard("🙏", "Dil Se Dhanyawad", "🙏 Dil se bahut bahut dhanyawad!", "Thank you"));
+        cards.add(new GifCard("❤️", "Bohot Shukriya", "❤️ Bohot shukriya aapki madad ke liye!", "Thank you"));
+        cards.add(new GifCard("🤝", "Thanks Dost", "🤝 Thanks dost! Yaari zindabad!", "Thank you"));
+        cards.add(new GifCard("🌹", "Thank You So Much", "🌹 You are the best! Thank you so much!", "Thank you"));
+        cards.add(new GifCard("🍫", "Sweet Thanks", "🍫 Mithaas bhara shukriya aapke liye!", "Thank you"));
+
+        // 8. Excited
+        cards.add(new GifCard("🤩", "Aag Laga Di", "🤩 Aag laga di bhai! Full on excitement!", "Excited"));
+        cards.add(new GifCard("🕺", "Nacho Saare", "🕺 Nacho nacho! Full energy and fun!", "Excited"));
+        cards.add(new GifCard("⚡", "Full Power", "⚡ 440 Volt current! Full on hype!", "Excited"));
+        cards.add(new GifCard("🙌", "Balle Balle", "🙌 Balle balle shava shava! Mazaa aa gaya!", "Excited"));
+        cards.add(new GifCard("🥳", "Party Shuru", "🥳 Abhi toh party shuru hui hai! Let's go!", "Excited"));
+        cards.add(new GifCard("🔥", "Level Sabke Niklenge", "🔥 Josh ekdum high hai boss!", "Excited"));
+
         return cards;
     }
 }

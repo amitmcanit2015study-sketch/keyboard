@@ -16,7 +16,7 @@
     <FrameLayout
         android:id="@+id/keyboardContainer"
         android:layout_width="match_parent"
-        android:layout_height="280dp">
+        android:layout_height="276dp">
 
         <com.amitbharat.keyboard.ime.SoftKeyboardView
             android:id="@+id/softKeyboardView"

@@ -255,7 +255,6 @@ public class CandidateStripView extends FrameLayout {
             chip.setLayoutParams(lp);
 
             chip.setOnClickListener(v -> {
-                android.util.Log.d("IndicKeyboard", "Candidate chip clicked: " + word);
                 if (candidateListener != null) {
                     candidateListener.onCandidateClicked(word);
                 }
