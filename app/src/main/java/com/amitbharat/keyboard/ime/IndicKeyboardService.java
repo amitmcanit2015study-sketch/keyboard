@@ -1,17 +1,26 @@
 package com.amitbharat.keyboard.ime;
 
+import android.Manifest;
 import android.content.Intent;
+import android.content.pm.PackageManager;
 import android.inputmethodservice.InputMethodService;
+import android.os.Bundle;
+import android.speech.RecognitionListener;
+import android.speech.RecognizerIntent;
+import android.speech.SpeechRecognizer;
 import android.text.InputType;
 import android.view.View;
 import android.view.inputmethod.EditorInfo;
 import android.view.inputmethod.InputConnection;
 import android.widget.FrameLayout;
+import androidx.core.content.ContextCompat;
 import com.amitbharat.keyboard.R;
 import com.amitbharat.keyboard.engine.EnglishDictionary;
 import com.amitbharat.keyboard.engine.HinglishTransliterator;
 import com.amitbharat.keyboard.engine.KeyboardPreferences;
 import com.amitbharat.keyboard.ui.MainActivity;
+import com.amitbharat.keyboard.ui.VoicePermissionActivity;
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
@@ -32,6 +41,8 @@ public class IndicKeyboardService extends InputMethodService implements
     private List<String> currentSuggestions = Collections.emptyList();
 
     private long lastSpaceTime = 0;
+    private SpeechRecognizer speechRecognizer;
+    private boolean isVoiceListening = false;
 
     private android.content.SharedPreferences sharedPreferences;
     private final android.content.SharedPreferences.OnSharedPreferenceChangeListener prefListener =
@@ -77,9 +88,16 @@ public class IndicKeyboardService extends InputMethodService implements
     @Override
     public void onDestroy() {
         super.onDestroy();
+        stopVoiceInput();
         if (sharedPreferences != null) {
             sharedPreferences.unregisterOnSharedPreferenceChangeListener(prefListener);
         }
+    }
+
+    @Override
+    public void onFinishInputView(boolean finishingInput) {
+        super.onFinishInputView(finishingInput);
+        stopVoiceInput();
     }
 
     @Override
@@ -117,6 +135,9 @@ public class IndicKeyboardService extends InputMethodService implements
             intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
             startActivity(intent);
         });
+
+        // Voice input mic shortcut
+        candidateStripView.setOnVoiceClickListener(this::handleVoiceInput);
 
         softKeyboardView.setOnKeyboardActionListener(this);
         emojiKeyboardView.setOnEmojiSelectedListener(this);
@@ -192,6 +213,9 @@ public class IndicKeyboardService extends InputMethodService implements
 
     @Override
     public void onKey(int primaryCode, KeyboardKey key) {
+        if (isVoiceListening) {
+            stopVoiceInput();
+        }
         InputConnection ic = getCurrentInputConnection();
         if (ic == null) return;
 
@@ -261,13 +285,23 @@ public class IndicKeyboardService extends InputMethodService implements
     private void handleSpace(InputConnection ic) {
         long now = System.currentTimeMillis();
         if (composingText.length() > 0) {
-            // Commit top candidate or composing text
-            if (preferences.isAutoCorrectEnabled() && !currentSuggestions.isEmpty()) {
+            String typed = composingText.toString();
+            String toCommit = typed;
+
+            // Suggested word should take ONLY when it completes with correct spelling
+            // Single character like 'h' must NEVER auto-complete to a suggested word on space
+            if (typed.length() > 1 && preferences.isAutoCorrectEnabled() && !currentSuggestions.isEmpty()) {
                 String topChoice = currentSuggestions.get(0);
-                ic.commitText(topChoice + " ", 1);
-            } else {
-                ic.commitText(composingText.toString() + " ", 1);
+                if ("EN".equalsIgnoreCase(currentLanguage)) {
+                    if (EnglishDictionary.isCorrectWord(typed) || topChoice.equalsIgnoreCase(typed)) {
+                        toCommit = topChoice;
+                    }
+                } else {
+                    toCommit = topChoice;
+                }
             }
+
+            ic.commitText(toCommit + " ", 1);
             composingText.setLength(0);
             currentSuggestions = Collections.emptyList();
             if (candidateStripView != null) {
@@ -307,11 +341,17 @@ public class IndicKeyboardService extends InputMethodService implements
     private void commitComposingText(InputConnection ic, boolean appendSpace) {
         if (composingText.length() == 0) return;
 
-        String toCommit;
-        if (!currentSuggestions.isEmpty()) {
-            toCommit = currentSuggestions.get(0);
-        } else {
-            toCommit = composingText.toString();
+        String typed = composingText.toString();
+        String toCommit = typed;
+        if (typed.length() > 1 && !currentSuggestions.isEmpty()) {
+            String topChoice = currentSuggestions.get(0);
+            if ("EN".equalsIgnoreCase(currentLanguage)) {
+                if (EnglishDictionary.isCorrectWord(typed) || topChoice.equalsIgnoreCase(typed)) {
+                    toCommit = topChoice;
+                }
+            } else {
+                toCommit = topChoice;
+            }
         }
 
         ic.commitText(appendSpace ? (toCommit + " ") : toCommit, 1);
@@ -408,6 +448,190 @@ public class IndicKeyboardService extends InputMethodService implements
         if (emojiKeyboardView != null) {
             emojiKeyboardView.updateTheme();
             emojiKeyboardView.setVisibility(View.VISIBLE);
+        }
+    }
+
+    private void handleVoiceInput() {
+        if (ContextCompat.checkSelfPermission(this, Manifest.permission.RECORD_AUDIO)
+                != PackageManager.PERMISSION_GRANTED) {
+            Intent intent = new Intent(this, VoicePermissionActivity.class);
+            intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+            startActivity(intent);
+            return;
+        }
+
+        if (isVoiceListening) {
+            stopVoiceInput();
+            return;
+        }
+
+        startVoiceInput();
+    }
+
+    private void startVoiceInput() {
+        if (!SpeechRecognizer.isRecognitionAvailable(this)) {
+            android.widget.Toast.makeText(this, "Speech recognition is not available", android.widget.Toast.LENGTH_SHORT).show();
+            return;
+        }
+
+        stopVoiceInput();
+
+        try {
+            speechRecognizer = SpeechRecognizer.createSpeechRecognizer(this);
+            speechRecognizer.setRecognitionListener(new RecognitionListener() {
+                @Override
+                public void onReadyForSpeech(Bundle params) {
+                    isVoiceListening = true;
+                    if (candidateStripView != null) {
+                        candidateStripView.setVoiceListening(true);
+                        String langPrompt = "EN".equalsIgnoreCase(currentLanguage)
+                                ? "Listening... Speak in English"
+                                : "सुन रहे हैं... हिन्दी में बोलें";
+                        candidateStripView.showVoiceStatus(langPrompt);
+                    }
+                }
+
+                @Override
+                public void onBeginningOfSpeech() {
+                }
+
+                @Override
+                public void onRmsChanged(float rmsdB) {
+                }
+
+                @Override
+                public void onBufferReceived(byte[] buffer) {
+                }
+
+                @Override
+                public void onEndOfSpeech() {
+                    if (candidateStripView != null) {
+                        candidateStripView.showVoiceStatus("Processing...");
+                    }
+                }
+
+                @Override
+                public void onError(int error) {
+                    android.util.Log.w("IndicKeyboard", "SpeechRecognizer error code: " + error);
+                    stopVoiceListeningState();
+                }
+
+                @Override
+                public void onResults(Bundle results) {
+                    if (results != null) {
+                        ArrayList<String> matches = results.getStringArrayList(SpeechRecognizer.RESULTS_RECOGNITION);
+                        if (matches != null && !matches.isEmpty()) {
+                            commitSpokenSentence(matches.get(0));
+                        }
+                    }
+                    stopVoiceListeningState();
+                }
+
+                @Override
+                public void onPartialResults(Bundle partialResults) {
+                    if (partialResults != null) {
+                        ArrayList<String> partial = partialResults.getStringArrayList(SpeechRecognizer.RESULTS_RECOGNITION);
+                        if (partial != null && !partial.isEmpty() && candidateStripView != null) {
+                            candidateStripView.showVoiceStatus(partial.get(0));
+                        }
+                    }
+                }
+
+                @Override
+                public void onEvent(int eventType, Bundle params) {
+                }
+            });
+
+            String speechLocale = getSpeechLocale(currentLanguage);
+            Intent intent = new Intent(RecognizerIntent.ACTION_RECOGNIZE_SPEECH);
+            intent.putExtra(RecognizerIntent.EXTRA_LANGUAGE_MODEL, RecognizerIntent.LANGUAGE_MODEL_FREE_FORM);
+            intent.putExtra(RecognizerIntent.EXTRA_PARTIAL_RESULTS, true);
+            intent.putExtra(RecognizerIntent.EXTRA_LANGUAGE, speechLocale);
+            intent.putExtra(RecognizerIntent.EXTRA_LANGUAGE_PREFERENCE, speechLocale);
+            intent.putExtra("android.speech.extra.EXTRA_ADDITIONAL_LANGUAGES", new String[]{speechLocale});
+            intent.putExtra(RecognizerIntent.EXTRA_MAX_RESULTS, 3);
+
+            isVoiceListening = true;
+            if (candidateStripView != null) {
+                candidateStripView.setVoiceListening(true);
+                String initPrompt = "EN".equalsIgnoreCase(currentLanguage)
+                        ? "Starting English Voice..."
+                        : "हिन्दी आवाज़ शुरू हो रही है...";
+                candidateStripView.showVoiceStatus(initPrompt);
+            }
+
+            speechRecognizer.startListening(intent);
+        } catch (Exception e) {
+            android.util.Log.e("IndicKeyboard", "Failed to start speech recognition", e);
+            stopVoiceListeningState();
+        }
+    }
+
+    private String getSpeechLocale(String lang) {
+        if ("EN".equalsIgnoreCase(lang)) {
+            return "en-IN"; // English
+        } else if ("HN".equalsIgnoreCase(lang)) {
+            return "hi-IN"; // Hindi
+        } else if ("MR".equalsIgnoreCase(lang)) {
+            return "mr-IN";
+        } else if ("BN".equalsIgnoreCase(lang)) {
+            return "bn-IN";
+        } else if ("TE".equalsIgnoreCase(lang)) {
+            return "te-IN";
+        } else if ("TA".equalsIgnoreCase(lang)) {
+            return "ta-IN";
+        } else if ("GU".equalsIgnoreCase(lang)) {
+            return "gu-IN";
+        } else if ("KN".equalsIgnoreCase(lang)) {
+            return "kn-IN";
+        } else if ("ML".equalsIgnoreCase(lang)) {
+            return "ml-IN";
+        } else if ("PA".equalsIgnoreCase(lang)) {
+            return "pa-IN";
+        } else if ("UR".equalsIgnoreCase(lang)) {
+            return "ur-IN";
+        } else {
+            return "hi-IN";
+        }
+    }
+
+    private void commitSpokenSentence(String sentence) {
+        if (sentence == null || sentence.trim().isEmpty()) return;
+        InputConnection ic = getCurrentInputConnection();
+        if (ic == null) return;
+
+        if (composingText.length() > 0) {
+            ic.commitText(composingText.toString() + " ", 1);
+            composingText.setLength(0);
+        }
+
+        CharSequence before = ic.getTextBeforeCursor(1, 0);
+        StringBuilder sb = new StringBuilder();
+        if (before != null && before.length() > 0 && !Character.isWhitespace(before.charAt(before.length() - 1))) {
+            sb.append(" ");
+        }
+        sb.append(sentence.trim()).append(" ");
+        ic.commitText(sb.toString(), 1);
+    }
+
+    private void stopVoiceInput() {
+        if (speechRecognizer != null) {
+            try {
+                speechRecognizer.stopListening();
+                speechRecognizer.cancel();
+                speechRecognizer.destroy();
+            } catch (Exception ignored) {
+            }
+            speechRecognizer = null;
+        }
+        stopVoiceListeningState();
+    }
+
+    private void stopVoiceListeningState() {
+        isVoiceListening = false;
+        if (candidateStripView != null) {
+            candidateStripView.setVoiceListening(false);
+            candidateStripView.setSuggestions(Collections.emptyList());
         }
     }
 }

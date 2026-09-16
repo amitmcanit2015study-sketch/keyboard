@@ -2,9 +2,16 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android">
 
     <uses-permission android:name="android.permission.VIBRATE" />
+    <uses-permission android:name="android.permission.RECORD_AUDIO" />
     <uses-permission
         android:name="android.permission.WRITE_EXTERNAL_STORAGE"
         android:maxSdkVersion="28" />
+
+    <queries>
+        <intent>
+            <action android:name="android.speech.RecognitionService" />
+        </intent>
+    </queries>
 
     <application
         android:name=".KeyboardApp"
@@ -45,6 +52,12 @@
             android:name=".ui.AboutActivity"
             android:exported="true"
             android:label="@string/action_about" />
+
+        <!-- 3b. Voice Permission Requester Activity -->
+        <activity
+            android:name=".ui.VoicePermissionActivity"
+            android:exported="false"
+            android:theme="@android:style/Theme.Translucent.NoTitleBar" />
 
         <!-- AppLocales service for AndroidX per-app language support -->
         <service

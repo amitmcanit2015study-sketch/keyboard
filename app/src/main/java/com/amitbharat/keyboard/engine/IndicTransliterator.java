@@ -476,16 +476,17 @@ public class IndicTransliterator {
             return Collections.emptyList();
         }
 
-        String q = query.trim().toLowerCase(Locale.ROOT);
+        String rawQuery = query.trim();
+        String q = rawQuery.toLowerCase(Locale.ROOT);
 
         // Hindi uses HinglishTransliterator
         if ("HN".equalsIgnoreCase(lang)) {
-            return HinglishTransliterator.getSuggestions(q);
+            return HinglishTransliterator.getSuggestions(rawQuery);
         }
 
         // English uses EnglishDictionary
         if ("EN".equalsIgnoreCase(lang)) {
-            return EnglishDictionary.getSuggestions(q);
+            return EnglishDictionary.getSuggestions(rawQuery);
         }
 
         List<String> results = new ArrayList<>();

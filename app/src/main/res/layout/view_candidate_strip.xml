@@ -91,6 +91,16 @@
         android:layout_marginEnd="4dp"
         android:background="@color/candidate_bar_border" />
 
+    <!-- Voice Input Action (Mic) -->
+    <ImageButton
+        android:id="@+id/btnVoiceInput"
+        android:layout_width="36dp"
+        android:layout_height="36dp"
+        android:background="?android:attr/selectableItemBackgroundBorderless"
+        android:contentDescription="Voice Input"
+        android:padding="8dp"
+        android:src="@drawable/ic_mic" />
+
     <!-- 3. Quick Settings Action -->
     <ImageButton
         android:id="@+id/btnQuickSettings"

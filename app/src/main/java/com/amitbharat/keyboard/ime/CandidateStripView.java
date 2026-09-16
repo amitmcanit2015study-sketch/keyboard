@@ -25,11 +25,14 @@ public class CandidateStripView extends FrameLayout {
     private TextView tvActiveLang;
     private TextView tvAltLang;
     private LinearLayout layoutSuggestionsContainer;
+    private ImageButton btnVoiceInput;
     private ImageButton btnQuickSettings;
 
     private OnCandidateClickListener candidateListener;
     private Runnable languageToggleListener;
     private Runnable settingsClickListener;
+    private Runnable voiceClickListener;
+    private boolean isVoiceListening = false;
 
     public CandidateStripView(Context context) {
         super(context);
@@ -52,6 +55,7 @@ public class CandidateStripView extends FrameLayout {
         tvActiveLang = findViewById(R.id.tvActiveLang);
         tvAltLang = findViewById(R.id.tvAltLang);
         layoutSuggestionsContainer = findViewById(R.id.layoutSuggestionsContainer);
+        btnVoiceInput = findViewById(R.id.btnVoiceInput);
         btnQuickSettings = findViewById(R.id.btnQuickSettings);
 
         btnLanguageToggle.setOnClickListener(v -> {
@@ -59,6 +63,14 @@ public class CandidateStripView extends FrameLayout {
                 languageToggleListener.run();
             }
         });
+
+        if (btnVoiceInput != null) {
+            btnVoiceInput.setOnClickListener(v -> {
+                if (voiceClickListener != null) {
+                    voiceClickListener.run();
+                }
+            });
+        }
 
         btnQuickSettings.setOnClickListener(v -> {
             if (settingsClickListener != null) {
@@ -104,6 +116,39 @@ public class CandidateStripView extends FrameLayout {
 
     public void setOnSettingsClickListener(Runnable listener) {
         this.settingsClickListener = listener;
+    }
+
+    public void setOnVoiceClickListener(Runnable listener) {
+        this.voiceClickListener = listener;
+    }
+
+    public void setVoiceListening(boolean listening) {
+        this.isVoiceListening = listening;
+        if (btnVoiceInput != null) {
+            if (listening) {
+                btnVoiceInput.setColorFilter(0xFFE53935);
+            } else {
+                Context ctx = getContext();
+                boolean isNight = (ctx.getResources().getConfiguration().uiMode & android.content.res.Configuration.UI_MODE_NIGHT_MASK) == android.content.res.Configuration.UI_MODE_NIGHT_YES;
+                btnVoiceInput.setColorFilter(isNight ? 0xFFCBD5E1 : 0xFF4B5563);
+            }
+        }
+    }
+
+    public void showVoiceStatus(String statusText) {
+        layoutSuggestionsContainer.removeAllViews();
+        if (statusText == null || statusText.isEmpty()) return;
+        Context ctx = getContext();
+        TextView statusView = new TextView(ctx);
+        statusView.setText(statusText);
+        statusView.setGravity(Gravity.CENTER_VERTICAL);
+        statusView.setSingleLine(true);
+        boolean isNight = (ctx.getResources().getConfiguration().uiMode & android.content.res.Configuration.UI_MODE_NIGHT_MASK) == android.content.res.Configuration.UI_MODE_NIGHT_YES;
+        statusView.setTextColor(isNight ? 0xFF93C5FD : 0xFF1D4ED8);
+        statusView.setTextSize(TypedValue.COMPLEX_UNIT_SP, 14.5f);
+        int padH = (int) TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP, 8, ctx.getResources().getDisplayMetrics());
+        statusView.setPadding(padH, 0, padH, 0);
+        layoutSuggestionsContainer.addView(statusView);
     }
 
     private int currentAccentColor = 0xFF283C5A;
@@ -156,8 +201,12 @@ public class CandidateStripView extends FrameLayout {
             tvDivider.setAlpha(0.75f);
         }
 
+        boolean isNight = (ctx.getResources().getConfiguration().uiMode & android.content.res.Configuration.UI_MODE_NIGHT_MASK) == android.content.res.Configuration.UI_MODE_NIGHT_YES;
+        if (btnVoiceInput != null) {
+            btnVoiceInput.setColorFilter(isVoiceListening ? 0xFFE53935 : (isNight ? 0xFFCBD5E1 : 0xFF4B5563));
+        }
+
         if (btnQuickSettings != null) {
-            boolean isNight = (ctx.getResources().getConfiguration().uiMode & android.content.res.Configuration.UI_MODE_NIGHT_MASK) == android.content.res.Configuration.UI_MODE_NIGHT_YES;
             btnQuickSettings.setColorFilter(isNight ? 0xFFCBD5E1 : 0xFF4B5563);
         }
     }

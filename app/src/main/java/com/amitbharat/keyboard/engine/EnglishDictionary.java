@@ -146,8 +146,9 @@ public class EnglishDictionary {
             collectWords(curr, results, 6);
         }
 
-        // If exact match is found, ensure it is first
-        if (COMMON_WORDS_SET.contains(lowerQuery) && !results.contains(lowerQuery)) {
+        // If exact match is found in common words, ensure it is at index 0
+        if (COMMON_WORDS_SET.contains(lowerQuery)) {
+            results.remove(lowerQuery);
             results.add(0, lowerQuery);
         }
 
@@ -175,6 +176,14 @@ public class EnglishDictionary {
         }
 
         return formatted;
+    }
+
+    /**
+     * Check if a word is a valid complete word in the dictionary.
+     */
+    public static boolean isCorrectWord(String word) {
+        if (word == null || word.trim().isEmpty()) return false;
+        return COMMON_WORDS_SET.contains(word.trim().toLowerCase(Locale.ROOT));
     }
 
     private static void collectWords(TrieNode node, List<String> results, int max) {
