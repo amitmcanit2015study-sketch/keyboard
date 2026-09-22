@@ -67,7 +67,20 @@ public class EnglishDictionary {
             return Collections.emptyList();
         }
 
+        boolean endsWithSpace = query.endsWith(" ");
         String trimmed = query.trim();
+        String lowerQuery = trimmed.toLowerCase(Locale.ROOT);
+
+        // Bigram next-word prediction if user typed a space or multiple words
+        if (endsWithSpace || lowerQuery.contains(" ")) {
+            String[] tokens = lowerQuery.split("\s+");
+            String lastWord = tokens[tokens.length - 1];
+            List<String> nextWords = BIGRAMS.get(lastWord);
+            if (nextWords != null && !nextWords.isEmpty()) {
+                return new ArrayList<>(nextWords);
+            }
+        }
+
         synchronized (QUERY_CACHE) {
             List<String> cached = QUERY_CACHE.get(trimmed);
             if (cached != null) {
@@ -76,7 +89,6 @@ public class EnglishDictionary {
         }
 
         List<String> rawResults = new ArrayList<>();
-        String lowerQuery = trimmed.toLowerCase(Locale.ROOT);
         boolean isCapitalized = Character.isUpperCase(trimmed.charAt(0));
         boolean isAllUpper = trimmed.length() > 1 && trimmed.equals(trimmed.toUpperCase(Locale.ROOT));
 
@@ -622,6 +634,15 @@ public class EnglishDictionary {
             "since",
             "ever",
             "piece",
+            "program",
+            "programming",
+            "progress",
+            "project",
+            "projects",
+            "process",
+            "product",
+            "provide",
+            "profile",
             "told",
             "usually",
             "didn't",
@@ -894,15 +915,6 @@ public class EnglishDictionary {
             "soft",
             "whether",
             "clothes",
-            "flowers",
-            "shall",
-            "teacher",
-            "held",
-            "describe",
-            "drive",
-            "hello",
-            "hi",
-            "hey",
         };
         int baseRank = 300;
         for (int i = 0; i < words.length; i++) {
@@ -915,6 +927,15 @@ public class EnglishDictionary {
 
     private static void initDictionaryPart2() {
         String[] words = new String[]{
+            "flowers",
+            "shall",
+            "teacher",
+            "held",
+            "describe",
+            "drive",
+            "hello",
+            "hi",
+            "hey",
             "thanks",
             "thank",
             "welcome",
@@ -1004,7 +1025,6 @@ public class EnglishDictionary {
             "trip",
             "traveling",
             "office",
-            "project",
             "urgent",
             "reminder",
             "schedule",
@@ -1207,14 +1227,6 @@ public class EnglishDictionary {
             "rarely",
             "twice",
             "daily",
-            "weekly",
-            "monthly",
-            "yearly",
-            "forever",
-            "alone",
-            "everyone",
-            "someone",
-            "anyone",
         };
         int baseRank = 600;
         for (int i = 0; i < words.length; i++) {
@@ -1227,6 +1239,14 @@ public class EnglishDictionary {
 
     private static void initDictionaryPart3() {
         String[] words = new String[]{
+            "weekly",
+            "monthly",
+            "yearly",
+            "forever",
+            "alone",
+            "everyone",
+            "someone",
+            "anyone",
             "no one",
             "everything",
             "everywhere",
@@ -1519,14 +1539,6 @@ public class EnglishDictionary {
             "breeze",
             "brick",
             "bridge",
-            "brief",
-            "briefly",
-            "bright",
-            "broad",
-            "broadcast",
-            "brown",
-            "brush",
-            "bubble",
         };
         int baseRank = 900;
         for (int i = 0; i < words.length; i++) {
@@ -1539,6 +1551,14 @@ public class EnglishDictionary {
 
     private static void initDictionaryPart4() {
         String[] words = new String[]{
+            "brief",
+            "briefly",
+            "bright",
+            "broad",
+            "broadcast",
+            "brown",
+            "brush",
+            "bubble",
             "budget",
             "build",
             "builder",
@@ -1831,14 +1851,6 @@ public class EnglishDictionary {
             "contribute",
             "contribution",
             "contributor",
-            "control",
-            "controversial",
-            "controversy",
-            "convenience",
-            "convenient",
-            "convention",
-            "conventional",
-            "conversation",
         };
         int baseRank = 1200;
         for (int i = 0; i < words.length; i++) {
@@ -1851,6 +1863,14 @@ public class EnglishDictionary {
 
     private static void initDictionaryPart5() {
         String[] words = new String[]{
+            "control",
+            "controversial",
+            "controversy",
+            "convenience",
+            "convenient",
+            "convention",
+            "conventional",
+            "conversation",
             "convert",
             "convey",
             "convict",
@@ -2143,14 +2163,6 @@ public class EnglishDictionary {
             "domestic",
             "dominant",
             "dominate",
-            "donation",
-            "doorway",
-            "dose",
-            "double",
-            "doubt",
-            "download",
-            "downstairs",
-            "downtown",
         };
         int baseRank = 1500;
         for (int i = 0; i < words.length; i++) {
@@ -2163,6 +2175,14 @@ public class EnglishDictionary {
 
     private static void initDictionaryPart6() {
         String[] words = new String[]{
+            "donation",
+            "doorway",
+            "dose",
+            "double",
+            "doubt",
+            "download",
+            "downstairs",
+            "downtown",
             "dozen",
             "draft",
             "drag",
@@ -2455,14 +2475,6 @@ public class EnglishDictionary {
             "fifth",
             "fifty",
             "fight",
-            "fighter",
-            "fighting",
-            "file",
-            "fill",
-            "filter",
-            "final",
-            "finance",
-            "financial",
         };
         int baseRank = 1800;
         for (int i = 0; i < words.length; i++) {
@@ -2475,6 +2487,14 @@ public class EnglishDictionary {
 
     private static void initDictionaryPart7() {
         String[] words = new String[]{
+            "fighter",
+            "fighting",
+            "file",
+            "fill",
+            "filter",
+            "final",
+            "finance",
+            "financial",
             "finding",
             "finger",
             "finish",
@@ -2767,14 +2787,6 @@ public class EnglishDictionary {
             "huge",
             "human",
             "humanity",
-            "humble",
-            "humor",
-            "humorous",
-            "hunger",
-            "hunt",
-            "hunter",
-            "hunting",
-            "hurricane",
         };
         int baseRank = 2100;
         for (int i = 0; i < words.length; i++) {
@@ -2787,6 +2799,14 @@ public class EnglishDictionary {
 
     private static void initDictionaryPart8() {
         String[] words = new String[]{
+            "humble",
+            "humor",
+            "humorous",
+            "hunger",
+            "hunt",
+            "hunter",
+            "hunting",
+            "hurricane",
             "hurry",
             "hurt",
             "husband",
@@ -2851,6 +2871,7 @@ public class EnglishDictionary {
         COMMON_TYPOS.put("alright", "all right");
         COMMON_TYPOS.put("basicly", "basically");
         COMMON_TYPOS.put("completly", "completely");
+        COMMON_TYPOS.put("adress", "address");
         COMMON_TYPOS.put("dissapoint", "disappoint");
         COMMON_TYPOS.put("dissappointed", "disappointed");
         COMMON_TYPOS.put("embarass", "embarrass");
