@@ -5,99 +5,87 @@
     android:viewportWidth="108"
     android:viewportHeight="108">
 
-    <!-- Keyboard Base Shape in Center Safe Zone -->
-    <!-- Soft shadow -->
+    <!-- Ambient Shadow -->
     <path
-        android:fillColor="#25000000"
-        android:pathData="M24,30 L84,30 A8,8 0 0,1 92,38 L92,78 A8,8 0 0,1 84,86 L24,86 A8,8 0 0,1 16,78 L16,38 A8,8 0 0,1 24,30 Z" />
+        android:fillColor="#33000000"
+        android:pathData="M22,28 L86,28 A10,10 0 0,1 96,38 L96,78 A10,10 0 0,1 86,88 L22,88 A10,10 0 0,1 12,78 L12,38 A10,10 0 0,1 22,28 Z" />
 
-    <!-- Keyboard Body Card (Crisp Navy Slate with Glassmorphism Border) -->
+    <!-- Keyboard Body: Modern Slate Navy with Premium Glassmorphism Border -->
     <path
-        android:fillColor="#EE111827"
+        android:fillColor="#1E293B"
         android:strokeColor="#FFFFFF"
-        android:strokeWidth="1.5"
-        android:pathData="M24,28 L84,28 A8,8 0 0,1 92,36 L92,76 A8,8 0 0,1 84,84 L24,84 A8,8 0 0,1 16,76 L16,36 A8,8 0 0,1 24,28 Z" />
+        android:strokeWidth="2"
+        android:pathData="M22,26 L86,26 A10,10 0 0,1 96,36 L96,76 A10,10 0 0,1 86,86 L22,86 A10,10 0 0,1 12,76 L12,36 A10,10 0 0,1 22,26 Z" />
 
-    <!-- Key Rows Inside Keyboard -->
-    <!-- Row 1: Keys -->
+    <!-- Top Key Row: 5 Clean Elevated Rounded Keycaps -->
     <path
-        android:fillColor="#374151"
-        android:pathData="M21,34 h9 v7 h-9 z M33,34 h9 v7 h-9 z M45,34 h9 v7 h-9 z M57,34 h9 v7 h-9 z M69,34 h9 v7 h-9 z M81,34 h6 v7 h-6 z" />
+        android:fillColor="#334155"
+        android:pathData="M18,34 A3,3 0 0,1 21,31 L29,31 A3,3 0 0,1 32,34 L32,41 A3,3 0 0,1 29,44 L21,44 A3,3 0 0,1 18,41 Z
+                         M34,34 A3,3 0 0,1 37,31 L45,31 A3,3 0 0,1 48,34 L48,41 A3,3 0 0,1 45,44 L37,44 A3,3 0 0,1 34,41 Z
+                         M50,34 A3,3 0 0,1 53,31 L61,31 A3,3 0 0,1 64,34 L64,41 A3,3 0 0,1 61,44 L53,44 A3,3 0 0,1 50,41 Z
+                         M66,34 A3,3 0 0,1 69,31 L77,31 A3,3 0 0,1 80,34 L80,41 A3,3 0 0,1 77,44 L69,44 A3,3 0 0,1 66,41 Z
+                         M82,34 A3,3 0 0,1 85,31 L87,31 A3,3 0 0,1 90,34 L90,41 A3,3 0 0,1 87,44 L85,44 A3,3 0 0,1 82,41 Z" />
 
-    <!-- Row 2: Keys with Hindi & English Accents -->
-    <!-- Saffron Accent Key (Indic "अ") -->
+    <!-- Middle Row: Saffron Accent Key (Indic) + Core Keys + Green Accent Key (English) -->
+    <!-- Saffron Key (Left) -->
     <path
         android:fillColor="#FF9933"
-        android:pathData="M21,44 h11 v7 h-11 z" />
+        android:pathData="M18,49 A3,3 0 0,1 21,46 L30,46 A3,3 0 0,1 33,49 L33,56 A3,3 0 0,1 30,59 L21,59 A3,3 0 0,1 18,56 Z" />
+
+    <!-- Center Keys -->
     <path
-        android:fillColor="#374151"
-        android:pathData="M35,44 h8 v7 h-8 z M45,44 h8 v7 h-8 z M55,44 h8 v7 h-8 z M65,44 h8 v7 h-8 z" />
-    <!-- Green Accent Key (English "A") -->
+        android:fillColor="#334155"
+        android:pathData="M36,49 A3,3 0 0,1 39,46 L47,46 A3,3 0 0,1 50,49 L50,56 A3,3 0 0,1 47,59 L39,59 A3,3 0 0,1 36,56 Z
+                         M52,49 A3,3 0 0,1 55,46 L63,46 A3,3 0 0,1 66,49 L66,56 A3,3 0 0,1 63,59 L55,59 A3,3 0 0,1 52,56 Z
+                         M68,49 A3,3 0 0,1 71,46 L79,46 A3,3 0 0,1 82,49 L82,56 A3,3 0 0,1 79,59 L71,59 A3,3 0 0,1 68,56 Z" />
+
+    <!-- India Green Key (Right) -->
     <path
         android:fillColor="#138808"
-        android:pathData="M76,44 h11 v7 h-11 z" />
+        android:pathData="M84,49 A3,3 0 0,1 87,46 L89,46 A3,3 0 0,1 92,49 L92,56 A3,3 0 0,1 89,59 L87,59 A3,3 0 0,1 84,56 Z" />
 
-    <!-- Row 3: Space Bar & Side Keys -->
+    <!-- Bottom Row: Spacebar & Function Keys -->
+    <!-- ?123 Key -->
     <path
-        android:fillColor="#4B5563"
-        android:pathData="M21,54 h13 v8 h-13 z" />
-    <!-- Center Space Bar with Indian Tricolor Accent -->
-    <path
-        android:fillColor="#F3F4F6"
-        android:pathData="M37,54 h34 v8 h-34 z" />
-    <path
-        android:fillColor="#4B5563"
-        android:pathData="M74,54 h13 v8 h-13 z" />
+        android:fillColor="#475569"
+        android:pathData="M18,64 A3,3 0 0,1 21,61 L31,61 A3,3 0 0,1 34,64 L34,73 A3,3 0 0,1 31,76 L21,76 A3,3 0 0,1 18,73 Z" />
 
-    <!-- Ashoka Chakra Circular Medallion in White Section / Center Badge -->
+    <!-- Space Bar (Pure White with Subtle Shadow) -->
+    <path
+        android:fillColor="#F8FAFC"
+        android:strokeColor="#CBD5E1"
+        android:strokeWidth="1"
+        android:pathData="M37,64 A3,3 0 0,1 40,61 L71,61 A3,3 0 0,1 74,64 L74,73 A3,3 0 0,1 71,76 L40,76 A3,3 0 0,1 37,73 Z" />
+
+    <!-- Enter / Action Key (Royal Blue Accent) -->
+    <path
+        android:fillColor="#2563EB"
+        android:pathData="M77,64 A3,3 0 0,1 80,61 L89,61 A3,3 0 0,1 92,64 L92,73 A3,3 0 0,1 89,76 L80,76 A3,3 0 0,1 77,73 Z" />
+
+    <!-- Ashoka Chakra Circular Medallion in Center Space Bar -->
     <group
-        android:translateX="54"
-        android:translateY="58"
-        android:scaleX="0.6"
-        android:scaleY="0.6">
+        android:translateX="55.5"
+        android:translateY="68.5"
+        android:scaleX="0.45"
+        android:scaleY="0.45">
 
-        <!-- Chakra Outer Ring -->
+        <!-- Outer Ring -->
         <path
             android:strokeColor="#000080"
-            android:strokeWidth="1.8"
+            android:strokeWidth="2.4"
             android:fillColor="#00000000"
-            android:pathData="M0,-14 A14,14 0 1,1 0,14 A14,14 0 1,1 0,-14 Z" />
+            android:pathData="M0,-12 A12,12 0 1,1 0,12 A12,12 0 1,1 0,-12 Z" />
 
-        <!-- Chakra Hub Center Circle -->
+        <!-- Center Hub -->
         <path
             android:fillColor="#000080"
-            android:pathData="M0,-3.2 A3.2,3.2 0 1,1 0,3.2 A3.2,3.2 0 1,1 0,-3.2 Z" />
+            android:pathData="M0,-2.5 A2.5,2.5 0 1,1 0,2.5 A2.5,2.5 0 1,1 0,-2.5 Z" />
 
-        <!-- 24 Spokes radiating from Hub (12 spoke diameter lines across) -->
-        <!-- 0 & 180 deg -->
-        <path android:strokeColor="#000080" android:strokeWidth="0.9" android:pathData="M0,-14 L0,14" />
-        <!-- 90 & 270 deg -->
-        <path android:strokeColor="#000080" android:strokeWidth="0.9" android:pathData="M-14,0 L14,0" />
-        <!-- 45 & 225 deg -->
-        <path android:strokeColor="#000080" android:strokeWidth="0.9" android:pathData="M-9.9,-9.9 L9.9,9.9" />
-        <!-- 135 & 315 deg -->
-        <path android:strokeColor="#000080" android:strokeWidth="0.9" android:pathData="M-9.9,9.9 L9.9,-9.9" />
-        <!-- 15 & 195 deg -->
-        <path android:strokeColor="#000080" android:strokeWidth="0.9" android:pathData="M-3.6,-13.5 L3.6,13.5" />
-        <!-- 30 & 210 deg -->
-        <path android:strokeColor="#000080" android:strokeWidth="0.9" android:pathData="M-7.0,-12.1 L7.0,12.1" />
-        <!-- 60 & 240 deg -->
-        <path android:strokeColor="#000080" android:strokeWidth="0.9" android:pathData="M-12.1,-7.0 L12.1,7.0" />
-        <!-- 75 & 255 deg -->
-        <path android:strokeColor="#000080" android:strokeWidth="0.9" android:pathData="M-13.5,-3.6 L13.5,3.6" />
-        <!-- 105 & 285 deg -->
-        <path android:strokeColor="#000080" android:strokeWidth="0.9" android:pathData="M-13.5,3.6 L13.5,-3.6" />
-        <!-- 120 & 300 deg -->
-        <path android:strokeColor="#000080" android:strokeWidth="0.9" android:pathData="M-12.1,7.0 L12.1,-7.0" />
-        <!-- 150 & 330 deg -->
-        <path android:strokeColor="#000080" android:strokeWidth="0.9" android:pathData="M-7.0,12.1 L7.0,-12.1" />
-        <!-- 165 & 345 deg -->
-        <path android:strokeColor="#000080" android:strokeWidth="0.9" android:pathData="M-3.6,13.5 L3.6,-13.5" />
+        <!-- 8 Cardinal & Diagonal Spokes -->
+        <path android:strokeColor="#000080" android:strokeWidth="1.5" android:pathData="M0,-12 L0,12" />
+        <path android:strokeColor="#000080" android:strokeWidth="1.5" android:pathData="M-12,0 L12,0" />
+        <path android:strokeColor="#000080" android:strokeWidth="1.5" android:pathData="M-8.5,-8.5 L8.5,8.5" />
+        <path android:strokeColor="#000080" android:strokeWidth="1.5" android:pathData="M-8.5,8.5 L8.5,-8.5" />
     </group>
-
-    <!-- Bottom Indicator / Mic & Star Accents -->
-    <path
-        android:fillColor="#FFD700"
-        android:pathData="M54,68 L55.2,71.5 L59,71.5 L56,73.5 L57.1,77 L54,74.8 L50.9,77 L52,73.5 L49,71.5 L52.8,71.5 Z" />
 
 </vector>

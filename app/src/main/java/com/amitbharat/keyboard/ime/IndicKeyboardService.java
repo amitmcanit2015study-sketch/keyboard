@@ -21,6 +21,15 @@ import com.amitbharat.keyboard.engine.HinglishTransliterator;
 import com.amitbharat.keyboard.engine.KeyboardPreferences;
 import com.amitbharat.keyboard.ui.MainActivity;
 import com.amitbharat.keyboard.ui.VoicePermissionActivity;
+import androidx.core.view.inputmethod.EditorInfoCompat;
+import androidx.core.view.inputmethod.InputConnectionCompat;
+import androidx.core.view.inputmethod.InputContentInfoCompat;
+import androidx.core.content.FileProvider;
+import android.content.ClipDescription;
+import android.net.Uri;
+import android.os.Build;
+import android.util.Log;
+import java.io.File;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
@@ -364,7 +373,7 @@ public class IndicKeyboardService extends InputMethodService implements
         if (typed.length() > 1 && !currentSuggestions.isEmpty()) {
             String topChoice = currentSuggestions.get(0);
             if ("EN".equalsIgnoreCase(currentLanguage)) {
-                if (EnglishDictionary.isCorrectWord(typed) || topChoice.equalsIgnoreCase(typed)) {
+                if (EnglishDictionary.isCorrectWord(typed) || topChoice.equalsIgnoreCase(typed) || EnglishDictionary.hasAutocorrect(typed)) {
                     toCommit = topChoice;
                 }
             } else {
@@ -441,6 +450,74 @@ public class IndicKeyboardService extends InputMethodService implements
             }
             ic.commitText(content + " ", 1);
         }
+    }
+
+    @Override
+    public void onRealGifSelected(String assetFile, String title) {
+        sendGif(assetFile, title);
+    }
+
+    public boolean sendGif(String assetFileName, String description) {
+        InputConnection ic = getCurrentInputConnection();
+        EditorInfo ei = getCurrentInputEditorInfo();
+        if (ic == null || ei == null) return false;
+
+        File gifFile = GifLoader.getOrExtractGifFile(this, assetFileName);
+        if (gifFile == null || !gifFile.exists()) return false;
+
+        String[] mimeTypes = EditorInfoCompat.getContentMimeTypes(ei);
+        boolean gifSupported = false;
+        for (String mime : mimeTypes) {
+            if (ClipDescription.compareMimeTypes(mime, "image/gif")) {
+                gifSupported = true;
+                break;
+            }
+        }
+
+        Uri contentUri = FileProvider.getUriForFile(
+                this,
+                getPackageName() + ".fileprovider",
+                gifFile
+        );
+
+        if (gifSupported) {
+            InputContentInfoCompat inputContentInfo = new InputContentInfoCompat(
+                    contentUri,
+                    new ClipDescription(description, new String[]{"image/gif"}),
+                    null
+            );
+
+            int flags = 0;
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N_MR1) {
+                flags |= InputConnectionCompat.INPUT_CONTENT_GRANT_READ_URI_PERMISSION;
+            } else {
+                grantUriPermission(ei.packageName, contentUri, Intent.FLAG_GRANT_READ_URI_PERMISSION);
+            }
+
+            try {
+                return InputConnectionCompat.commitContent(ic, ei, inputContentInfo, flags, null);
+            } catch (Exception e) {
+                Log.e("IndicKeyboardService", "commitContent failed", e);
+            }
+        }
+
+        // Fallback: If editor doesn't support commitContent, share via Intent
+        try {
+            Intent intent = new Intent(Intent.ACTION_SEND);
+            intent.setType("image/gif");
+            intent.putExtra(Intent.EXTRA_STREAM, contentUri);
+            intent.addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION);
+            intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+            if (ei.packageName != null) {
+                intent.setPackage(ei.packageName);
+            }
+            startActivity(Intent.createChooser(intent, "Share GIF").addFlags(Intent.FLAG_ACTIVITY_NEW_TASK));
+            return true;
+        } catch (Exception e) {
+            Log.e("IndicKeyboardService", "Fallback send failed", e);
+        }
+
+        return false;
     }
 
     @Override

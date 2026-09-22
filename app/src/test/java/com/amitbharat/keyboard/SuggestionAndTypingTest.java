@@ -53,4 +53,22 @@ public class SuggestionAndTypingTest {
         List<String> kyaSuggestions = IndicTransliterator.getSuggestions("HN", "kya");
         assertTrue("Hinglish 'kya' should suggest 'क्या'", kyaSuggestions.contains("क्या"));
     }
+
+    @Test
+    public void testBeautifulFuzzyAutocorrect() {
+        // Test user's exact case: typing "Beutifull" must suggest "Beautiful"
+        List<String> suggestions = IndicTransliterator.getSuggestions("EN", "Beutifull");
+        assertNotNull(suggestions);
+        assertFalse("Suggestions must not be empty for 'Beutifull'", suggestions.isEmpty());
+        assertEquals("Top autocorrect suggestion for 'Beutifull' must be 'Beautiful'", "Beautiful", suggestions.get(0));
+
+        // Test lowercase "beutifull"
+        List<String> lowerSuggestions = IndicTransliterator.getSuggestions("EN", "beutifull");
+        assertEquals("Top autocorrect suggestion for 'beutifull' must be 'beautiful'", "beautiful", lowerSuggestions.get(0));
+
+        // Test "definately" -> "definitely"
+        List<String> defSuggestions = IndicTransliterator.getSuggestions("EN", "definately");
+        assertEquals("Top autocorrect suggestion for 'definately' must be 'definitely'", "definitely", defSuggestions.get(0));
+    }
 }
+

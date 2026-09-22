@@ -221,6 +221,7 @@ public class CandidateStripView extends FrameLayout {
         boolean isNight = (ctx.getResources().getConfiguration().uiMode & android.content.res.Configuration.UI_MODE_NIGHT_MASK) == android.content.res.Configuration.UI_MODE_NIGHT_YES;
         int primaryColor = isNight ? 0xFFFFFFFF : 0xFF111827;
         int secondaryColor = isNight ? 0xFFD1D5DB : 0xFF4B5563;
+        boolean useWeight = suggestions.size() <= 3;
 
         for (int i = 0; i < suggestions.size(); i++) {
             final String word = suggestions.get(i);
@@ -228,29 +229,37 @@ public class CandidateStripView extends FrameLayout {
             chip.setText(word);
             chip.setGravity(Gravity.CENTER);
             chip.setSingleLine(true);
-            chip.setBackgroundResource(R.drawable.bg_suggestion_chip);
             chip.setClickable(true);
             chip.setFocusable(true);
 
-            // Highlight primary suggestion with pure, crisp contrast
+            // Highlight primary suggestion with crisp contrast and sleek pill
             if (i == 0) {
                 chip.setTextColor(primaryColor);
-                chip.setTextSize(TypedValue.COMPLEX_UNIT_SP, 16f);
+                chip.setTextSize(TypedValue.COMPLEX_UNIT_SP, 15.5f);
                 chip.setTypeface(null, android.graphics.Typeface.BOLD);
+                android.graphics.drawable.GradientDrawable primBg = new android.graphics.drawable.GradientDrawable();
+                primBg.setShape(android.graphics.drawable.GradientDrawable.RECTANGLE);
+                primBg.setCornerRadius(dpToPx(16));
+                primBg.setColor(isNight ? 0xFF2A3441 : 0xFFE2E8F0);
+                primBg.setStroke(dpToPx(1), 0xFF3B82F6);
+                chip.setBackground(primBg);
             } else {
                 chip.setTextColor(secondaryColor);
-                chip.setTextSize(TypedValue.COMPLEX_UNIT_SP, 15f);
+                chip.setTextSize(TypedValue.COMPLEX_UNIT_SP, 14.5f);
+                chip.setBackgroundResource(R.drawable.bg_suggestion_chip);
             }
 
-            int padH = (int) TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP, 12, ctx.getResources().getDisplayMetrics());
-            int padV = (int) TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP, 4, ctx.getResources().getDisplayMetrics());
+            int padH = dpToPx(10);
+            int padV = dpToPx(4);
             chip.setPadding(padH, padV, padH, padV);
 
-            LinearLayout.LayoutParams lp = new LinearLayout.LayoutParams(
-                    LinearLayout.LayoutParams.WRAP_CONTENT,
-                    (int) TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP, 32, ctx.getResources().getDisplayMetrics())
-            );
-            int marginH = (int) TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP, 4, ctx.getResources().getDisplayMetrics());
+            LinearLayout.LayoutParams lp;
+            if (useWeight) {
+                lp = new LinearLayout.LayoutParams(0, dpToPx(32), 1.0f);
+            } else {
+                lp = new LinearLayout.LayoutParams(LinearLayout.LayoutParams.WRAP_CONTENT, dpToPx(32));
+            }
+            int marginH = dpToPx(3);
             lp.setMargins(marginH, 0, marginH, 0);
             chip.setLayoutParams(lp);
 
@@ -263,4 +272,9 @@ public class CandidateStripView extends FrameLayout {
             layoutSuggestionsContainer.addView(chip);
         }
     }
+
+    private int dpToPx(int dp) {
+        return (int) TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP, dp, getResources().getDisplayMetrics());
+    }
+
 }
