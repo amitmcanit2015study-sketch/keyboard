@@ -1,13 +1,17 @@
 package com.amitbharat.keyboard.ui;
 
+import android.Manifest;
 import android.content.Context;
 import android.content.Intent;
+import android.content.pm.PackageManager;
 import android.os.Bundle;
 import android.provider.Settings;
 import android.view.View;
 import android.view.inputmethod.InputMethodInfo;
 import android.view.inputmethod.InputMethodManager;
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.core.app.ActivityCompat;
+import androidx.core.content.ContextCompat;
 import com.amitbharat.keyboard.R;
 import com.amitbharat.keyboard.databinding.ActivityMainBinding;
 import com.amitbharat.keyboard.engine.KeyboardPreferences;
@@ -45,6 +49,18 @@ public class MainActivity extends AppCompatActivity {
     protected void onResume() {
         super.onResume();
         updateKeyboardStatus();
+        checkMicrophonePermission();
+    }
+
+    private void checkMicrophonePermission() {
+        if (ContextCompat.checkSelfPermission(this, Manifest.permission.RECORD_AUDIO)
+                != PackageManager.PERMISSION_GRANTED) {
+            ActivityCompat.requestPermissions(
+                    this,
+                    new String[]{Manifest.permission.RECORD_AUDIO},
+                    101
+            );
+        }
     }
 
     private void setupToolbar() {

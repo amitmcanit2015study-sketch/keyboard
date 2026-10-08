@@ -1,11 +1,14 @@
 package com.amitbharat.keyboard.ime;
 
 import android.Manifest;
+import android.content.ComponentName;
 import android.content.Intent;
 import android.content.pm.PackageManager;
+import android.content.pm.ResolveInfo;
 import android.inputmethodservice.InputMethodService;
 import android.os.Bundle;
 import android.speech.RecognitionListener;
+import android.speech.RecognitionService;
 import android.speech.RecognizerIntent;
 import android.speech.SpeechRecognizer;
 import android.text.InputType;
@@ -21,6 +24,7 @@ import com.amitbharat.keyboard.engine.HinglishTransliterator;
 import com.amitbharat.keyboard.engine.KeyboardPreferences;
 import com.amitbharat.keyboard.ui.MainActivity;
 import com.amitbharat.keyboard.ui.VoicePermissionActivity;
+import com.amitbharat.keyboard.ui.VoiceInputActivity;
 import androidx.core.view.inputmethod.EditorInfoCompat;
 import androidx.core.view.inputmethod.InputConnectionCompat;
 import androidx.core.view.inputmethod.InputContentInfoCompat;
@@ -86,9 +90,30 @@ public class IndicKeyboardService extends InputMethodService implements
                 }
             };
 
+    private static IndicKeyboardService activeInstance;
+
+    public static IndicKeyboardService getActiveInstance() {
+        return activeInstance;
+    }
+
+    public static void onVoiceTranscriptionReceived(String text) {
+        if (activeInstance != null && text != null && !text.isEmpty()) {
+            activeInstance.commitSpokenSentence(text);
+        }
+    }
+
+    public void startVoiceInputFromPermission() {
+        if (rootView != null) {
+            rootView.post(this::startVoiceInput);
+        } else {
+            startVoiceInput();
+        }
+    }
+
     @Override
     public void onCreate() {
         super.onCreate();
+        activeInstance = this;
         android.util.Log.d("IndicKeyboard", "IndicKeyboardService onCreate called");
         preferences = new KeyboardPreferences(this);
         currentLanguage = preferences.getCurrentLanguage();
@@ -99,6 +124,9 @@ public class IndicKeyboardService extends InputMethodService implements
     @Override
     public void onDestroy() {
         super.onDestroy();
+        if (activeInstance == this) {
+            activeInstance = null;
+        }
         stopVoiceInput();
         if (sharedPreferences != null) {
             sharedPreferences.unregisterOnSharedPreferenceChangeListener(prefListener);
@@ -577,9 +605,14 @@ public class IndicKeyboardService extends InputMethodService implements
 
         if (ContextCompat.checkSelfPermission(this, Manifest.permission.RECORD_AUDIO)
                 != PackageManager.PERMISSION_GRANTED) {
-            Intent intent = new Intent(this, VoicePermissionActivity.class);
-            intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
-            startActivity(intent);
+            android.widget.Toast.makeText(this, "Microphone permission required for voice input", android.widget.Toast.LENGTH_SHORT).show();
+            try {
+                Intent intent = new Intent(this, VoicePermissionActivity.class);
+                intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+                startActivity(intent);
+            } catch (Exception e) {
+                android.util.Log.e("IndicKeyboard", "Failed to launch voice permission activity", e);
+            }
             return;
         }
 
@@ -591,16 +624,105 @@ public class IndicKeyboardService extends InputMethodService implements
         startVoiceInput();
     }
 
-    private void startVoiceInput() {
-        if (!SpeechRecognizer.isRecognitionAvailable(this)) {
-            android.widget.Toast.makeText(this, "Speech recognition is not available", android.widget.Toast.LENGTH_SHORT).show();
+    private SpeechRecognizer resolveSpeechRecognizer() {
+        android.content.Context appContext = getApplicationContext();
+
+        // 1. Check system-level default recognition service availability first
+        try {
+            if (SpeechRecognizer.isRecognitionAvailable(appContext)) {
+                SpeechRecognizer recognizer = SpeechRecognizer.createSpeechRecognizer(appContext);
+                if (recognizer != null) {
+                    android.util.Log.d("IndicKeyboard", "Using default system SpeechRecognizer");
+                    return recognizer;
+                }
+            }
+        } catch (Exception e) {
+            android.util.Log.w("IndicKeyboard", "Default SpeechRecognizer check failed: " + e.getMessage());
+        }
+
+        // 2. Check system-configured voice recognition service from Settings
+        try {
+            String serviceComponent = android.provider.Settings.Secure.getString(
+                    getContentResolver(), "voice_recognition_service");
+            if (serviceComponent != null && !serviceComponent.isEmpty()) {
+                ComponentName comp = ComponentName.unflattenFromString(serviceComponent);
+                if (comp != null) {
+                    SpeechRecognizer recognizer = SpeechRecognizer.createSpeechRecognizer(appContext, comp);
+                    if (recognizer != null) {
+                        android.util.Log.d("IndicKeyboard", "Using Settings configured speech recognizer: " + serviceComponent);
+                        return recognizer;
+                    }
+                }
+            }
+        } catch (Exception ignored) {}
+
+        // 3. Query installed services implementing RecognitionService
+        try {
+            Intent intent = new Intent(RecognitionService.SERVICE_INTERFACE);
+            List<ResolveInfo> list = getPackageManager().queryIntentServices(intent, 0);
+            if (list != null && !list.isEmpty()) {
+                for (ResolveInfo info : list) {
+                    if (info.serviceInfo != null) {
+                        ComponentName comp = new ComponentName(info.serviceInfo.packageName, info.serviceInfo.name);
+                        try {
+                            SpeechRecognizer recognizer = SpeechRecognizer.createSpeechRecognizer(appContext, comp);
+                            if (recognizer != null) {
+                                android.util.Log.d("IndicKeyboard", "Using queried speech recognizer: " + comp.flattenToShortString());
+                                return recognizer;
+                            }
+                        } catch (Exception ignored) {}
+                    }
+                }
+            }
+        } catch (Exception ignored) {}
+
+        // 4. Preferred explicit services for Xiaomi / MIUI / HyperOS and OEM devices
+        ComponentName[] preferredServices = new ComponentName[]{
+                new ComponentName("com.google.android.googlequicksearchbox", "com.google.android.voicesearch.serviceapi.GoogleRecognitionService"),
+                new ComponentName("com.google.android.tts", "com.google.android.apps.speech.tts.googletts.service.GoogleTTSRecognitionService"),
+                new ComponentName("com.google.android.googlequicksearchbox", "com.google.android.apps.gsa.speech.service.SpeechRecognitionService")
+        };
+
+        for (ComponentName comp : preferredServices) {
+            try {
+                getPackageManager().getServiceInfo(comp, 0);
+                SpeechRecognizer recognizer = SpeechRecognizer.createSpeechRecognizer(appContext, comp);
+                if (recognizer != null) {
+                    android.util.Log.d("IndicKeyboard", "Using explicit speech recognizer: " + comp.flattenToShortString());
+                    return recognizer;
+                }
+            } catch (Exception ignored) {}
+        }
+
+        return null;
+    }
+
+    public void launchSystemVoiceFallback() {
+        stopVoiceListeningState();
+        try {
+            Intent intent = new Intent(this, VoiceInputActivity.class);
+            intent.putExtra("language", getSpeechLocale(currentLanguage));
+            intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+            startActivity(intent);
+        } catch (Exception e) {
+            android.util.Log.e("IndicKeyboard", "Failed to launch voice input fallback", e);
+            if (candidateStripView != null) {
+                candidateStripView.showVoiceStatus("Voice typing unavailable");
+            }
+        }
+    }
+
+    public void startVoiceInput() {
+        stopVoiceInput();
+
+        speechRecognizer = resolveSpeechRecognizer();
+        if (speechRecognizer == null) {
+            android.util.Log.d("IndicKeyboard", "No speech recognizer found; using system voice fallback");
+            launchSystemVoiceFallback();
             return;
         }
 
-        stopVoiceInput();
-
         try {
-            speechRecognizer = SpeechRecognizer.createSpeechRecognizer(this);
             speechRecognizer.setRecognitionListener(new RecognitionListener() {
                 @Override
                 public void onReadyForSpeech(Bundle params) {
@@ -608,8 +730,8 @@ public class IndicKeyboardService extends InputMethodService implements
                     if (candidateStripView != null) {
                         candidateStripView.setVoiceListening(true);
                         String langPrompt = "EN".equalsIgnoreCase(currentLanguage)
-                                ? "Listening... Speak in English"
-                                : "सुन रहे हैं... हिन्दी में बोलें";
+                                ? "Listening... Speak now"
+                                : "सुन रहे हैं... बोलिए";
                         candidateStripView.showVoiceStatus(langPrompt);
                     }
                 }
@@ -636,6 +758,44 @@ public class IndicKeyboardService extends InputMethodService implements
                 @Override
                 public void onError(int error) {
                     android.util.Log.w("IndicKeyboard", "SpeechRecognizer error code: " + error);
+
+                    // If error is client, insufficient permissions or busy on low Android, fallback gracefully to system dialog
+                    if (error == SpeechRecognizer.ERROR_CLIENT ||
+                            error == SpeechRecognizer.ERROR_INSUFFICIENT_PERMISSIONS ||
+                            error == SpeechRecognizer.ERROR_RECOGNIZER_BUSY) {
+                        launchSystemVoiceFallback();
+                        return;
+                    }
+
+                    String errorMsg;
+                    switch (error) {
+                        case SpeechRecognizer.ERROR_AUDIO:
+                            errorMsg = "Audio recording error";
+                            break;
+                        case SpeechRecognizer.ERROR_NETWORK:
+                        case SpeechRecognizer.ERROR_NETWORK_TIMEOUT:
+                            errorMsg = "Network error";
+                            break;
+                        case SpeechRecognizer.ERROR_NO_MATCH:
+                            errorMsg = "No speech detected";
+                            break;
+                        case SpeechRecognizer.ERROR_SPEECH_TIMEOUT:
+                            errorMsg = "No speech heard";
+                            break;
+                        default:
+                            errorMsg = "Voice input error (" + error + ")";
+                            break;
+                    }
+                    if (candidateStripView != null) {
+                        candidateStripView.showVoiceStatus(errorMsg);
+                    }
+                    if (rootView != null) {
+                        rootView.postDelayed(() -> {
+                            if (!isVoiceListening && candidateStripView != null) {
+                                candidateStripView.setSuggestions(Collections.emptyList());
+                            }
+                        }, 2500);
+                    }
                     stopVoiceListeningState();
                 }
 
@@ -673,6 +833,8 @@ public class IndicKeyboardService extends InputMethodService implements
             intent.putExtra(RecognizerIntent.EXTRA_LANGUAGE_PREFERENCE, speechLocale);
             intent.putExtra("android.speech.extra.EXTRA_ADDITIONAL_LANGUAGES", new String[]{speechLocale});
             intent.putExtra(RecognizerIntent.EXTRA_MAX_RESULTS, 3);
+            intent.putExtra(RecognizerIntent.EXTRA_CALLING_PACKAGE, getPackageName());
+            intent.putExtra("android.speech.extra.DICTATION_MODE", true);
 
             isVoiceListening = true;
             if (candidateStripView != null) {
@@ -686,6 +848,9 @@ public class IndicKeyboardService extends InputMethodService implements
             speechRecognizer.startListening(intent);
         } catch (Exception e) {
             android.util.Log.e("IndicKeyboard", "Failed to start speech recognition", e);
+            if (candidateStripView != null) {
+                candidateStripView.showVoiceStatus("Failed to start voice");
+            }
             stopVoiceListeningState();
         }
     }

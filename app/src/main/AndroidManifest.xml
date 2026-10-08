@@ -11,6 +11,11 @@
         <intent>
             <action android:name="android.speech.RecognitionService" />
         </intent>
+        <intent>
+            <action android:name="android.intent.action.RECOGNIZE_SPEECH" />
+        </intent>
+        <package android:name="com.google.android.googlequicksearchbox" />
+        <package android:name="com.google.android.tts" />
     </queries>
 
     <application
@@ -56,6 +61,12 @@
         <!-- 3b. Voice Permission Requester Activity -->
         <activity
             android:name=".ui.VoicePermissionActivity"
+            android:exported="false"
+            android:theme="@android:style/Theme.Translucent.NoTitleBar" />
+
+        <!-- 3c. Universal Voice Input Dialog Fallback for Low Android -->
+        <activity
+            android:name=".ui.VoiceInputActivity"
             android:exported="false"
             android:theme="@android:style/Theme.Translucent.NoTitleBar" />
 
